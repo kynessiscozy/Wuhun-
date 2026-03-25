@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>斗罗大陆 · 武魂觉醒</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+:root{
+  --gold:#c9a227;--gold-l:#f0d060;--gold-d:#8a6e1a;
+  --bg:#050810;--bg2:#0a0f1e;--bgc:#0f1628;--bgc2:#141c35;
+  --txt:#e8dfc0;--dim:#6a7080;--bdr:rgba(201,162,39,.22);--bdrB:rgba(201,162,39,.55);
+  --common:#9ca3af;--rare:#3b82f6;--epic:#8b5cf6;--legend:#f59e0b;--apex:#ef4444;
+  --hc:#10b981;--ha:#ec4899;--twin:#f0abfc;--triple:#ffffff;--divine:#ffd700;
+  --r100:#a78bfa;--r1k:#60a5fa;--r10k:#34d399;--r100k:#fbbf24;--r1m:#f87171;--rUnk:#e879f9;--rGod:#fffbeb;--rCosmic:#00ffff;
+  --herb1:#22c55e;--herb2:#a3e635;--herb3:#86efac;--herb4:#4ade80;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Noto Sans SC',sans-serif;color:var(--txt);user-select:none}
+canvas#ptc{position:fixed;inset:0;z-index:0;pointer-events:none}
+#star-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twk var(--d) ease infinite var(--dl)}
+@keyframes twk{0%,100%{opacity:var(--mn)}50%{opacity:var(--mx)}}
+#app{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:linear-gradient(180deg,#050810,#080d1a)}
+
+/* TOP BAR */
+#topbar{flex-shrink:0;background:linear-gradient(180deg,rgba(5,8,16,.98),rgba(10,15,30,.95));border-bottom:1px solid var(–bdr);padding:10px 14px 8px;z-index:50}
+.tb-row{display:flex;align-items:center;justify-content:space-between}
+.tb-title{font-family:‘Ma Shan Zheng’,serif;font-size:20px;background:linear-gradient(135deg,var(–gold-l),var(–gold),var(–gold-d));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px}
+.tb-stats{display:flex;gap:8px;align-items:center}
+.pill{display:flex;align-items:center;gap:3px;background:rgba(201,162,39,.1);border:1px solid var(–bdr);border-radius:20px;padding:3px 9px;font-size:11px;color:var(–gold-l)}
+/* EXP BAR */
+.exp-row{margin-top:7px;display:flex;align-items:center;gap:8px}
+.exp-bar-wrap{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.exp-bar-fill{height:100%;background:linear-gradient(90deg,var(–gold-d),var(–gold-l));border-radius:3px;transition:width .6s ease}
+.exp-label{font-size:10px;color:var(–dim);white-space:nowrap;min-width:70px;text-align:right}
+
+/* NOTIF */
+#notif{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:300;width:90%;max-width:400px;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.ntf{background:linear-gradient(135deg,rgba(15,22,40,.97),rgba(20,28,53,.97));border:1px solid var(–bdrB);border-radius:10px;padding:9px 14px;font-size:12px;box-shadow:0 0 18px rgba(201,162,39,.3);animation:nIn .35s ease,nOut .4s ease 2.6s forwards;pointer-events:none}
+.ntf.epic{border-color:var(–epic);box-shadow:0 0 18px rgba(139,92,246,.5)}
+.ntf.legend{border-color:var(–legend);box-shadow:0 0 22px rgba(245,158,11,.6)}
+.ntf.divine{border-color:var(–divine);box-shadow:0 0 28px rgba(255,215,0,.7)}
+.ntf.cosmic{border-color:var(–rCosmic);box-shadow:0 0 36px rgba(0,255,255,.9)}
+@keyframes nIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes nOut{to{opacity:0;transform:translateY(-8px)}}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 68px;-webkit-overflow-scrolling:touch}
+#content::-webkit-scrollbar{display:none}
+
+/* BOTTOM NAV */
+#bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:linear-gradient(0deg,rgba(5,8,16,.99),rgba(10,15,30,.96));border-top:1px solid var(–bdr);display:flex;align-items:stretch;z-index:50;height:60px}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:all .2s;position:relative}
+.ni .ico{font-size:19px;transition:all .2s}
+.ni .lbl{font-size:9px;color:var(–dim);transition:all .2s;letter-spacing:.3px}
+.ni.active .lbl{color:var(–gold-l)}
+.ni.active::after{content:’’;position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(–gold);border-radius:2px 2px 0 0}
+
+/* PAGE */
+.page{display:none;padding:12px}
+.page.active{display:block}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.st{font-family:‘Ma Shan Zheng’,serif;font-size:15px;color:var(–gold-l);display:flex;align-items:center;gap:5px}
+.st::before{content:’’;width:3px;height:14px;background:linear-gradient(180deg,var(–gold-l),var(–gold-d));border-radius:2px}
+
+/* CARD */
+.card{background:linear-gradient(135deg,var(–bgc),var(–bgc2));border:1px solid var(–bdr);border-radius:13px;padding:13px;margin-bottom:11px;position:relative;overflow:hidden}
+.card::before{content:’’;position:absolute;inset:0;border-radius:13px;background:linear-gradient(135deg,rgba(201,162,39,.04),transparent 60%);pointer-events:none}
+
+/* QUALITY */
+.q-common{color:var(–common)}.q-rare{color:var(–rare)}.q-epic{color:var(–epic)}.q-legend{color:var(–legend)}.q-apex{color:var(–apex)}.q-hc{color:var(–hc)}.q-ha{color:var(–ha)}.q-twin{color:var(–twin)}.q-triple{color:var(–triple)}.q-divine{color:var(–divine);text-shadow:0 0 8px var(–divine)}
+
+/* ===== AWAKEN SCREEN ===== */
+#screen-awaken{position:fixed;inset:0;z-index:200;background:radial-gradient(ellipse at 50% 40%,rgba(20,28,53,.98),rgba(5,8,16,1));display:flex;flex-direction:column;align-items:center;justify-content:center}
+.aw-glow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(201,162,39,.12),transparent 70%);animation:awGlow 3s ease infinite}
+@keyframes awGlow{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+.aw-title{font-family:‘Ma Shan Zheng’,serif;font-size:26px;color:var(–gold-l);letter-spacing:6px;margin-bottom:6px;position:relative;z-index:1}
+.aw-sub{font-size:12px;color:var(–dim);margin-bottom:40px;position:relative;z-index:1;letter-spacing:2px}
+.aw-circle{width:200px;height:200px;border-radius:50%;border:1.5px solid var(–bdrB);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;background:radial-gradient(ellipse,rgba(20,28,53,.95),rgba(5,8,16,.98));cursor:pointer;margin-bottom:30px;z-index:1}
+.aw-ring1{position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(201,162,39,.2);animation:rot 9s linear infinite}
+.aw-ring2{position:absolute;inset:-20px;border-radius:50%;border:1px dashed rgba(124,58,237,.25);animation:rot 15s linear infinite reverse}
+.aw-ring3{position:absolute;inset:-32px;border-radius:50%;border:1px solid rgba(201,162,39,.08);animation:rot 22s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.aw-icon{font-size:72px;margin-bottom:4px}
+.aw-hint{font-size:12px;color:var(–dim);animation:blink 1.8s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+.aw-btn{padding:14px 40px;border-radius:12px;border:1px solid var(–bdrB);background:linear-gradient(135deg,rgba(201,162,39,.18),rgba(201,162,39,.06));color:var(–gold-l);font-size:17px;font-family:‘Ma Shan Zheng’,serif;letter-spacing:5px;cursor:pointer;transition:all .3s;position:relative;z-index:1}
+.aw-btn:hover{background:linear-gradient(135deg,rgba(201,162,39,.3),rgba(201,162,39,.12));box-shadow:0 0 22px rgba(201,162,39,.4)}
+
+/* ===== AWAKEN RESULT OVERLAY ===== */
+#ov-result{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+#ov-result.show{display:flex}
+.or-burst{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,var(–bc,rgba(201,162,39,.3)),transparent 65%);pointer-events:none;animation:burstP .9s ease infinite}
+@keyframes burstP{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+.or-icon{font-size:90px;margin-bottom:16px;position:relative;z-index:1;animation:iconFloat 2s ease infinite}
+@keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.or-q{font-family:‘Ma Shan Zheng’,serif;font-size:18px;letter-spacing:4px;margin-bottom:4px;position:relative;z-index:1}
+.or-name{font-family:‘Ma Shan Zheng’,serif;font-size:36px;font-weight:900;margin-bottom:8px;position:relative;z-index:1;letter-spacing:3px}
+.or-desc{font-size:12px;color:var(–dim);max-width:280px;text-align:center;line-height:1.7;margin-bottom:16px;position:relative;z-index:1}
+.or-stats{display:flex;gap:12px;margin-bottom:20px;position:relative;z-index:1}
+.or-stat{background:rgba(201,162,39,.1);border:1px solid var(–bdr);border-radius:8px;padding:7px 16px;text-align:center}
+.or-stat .v{font-size:22px;font-weight:700;color:var(–gold-l)}
+.or-stat .l{font-size:10px;color:var(–dim)}
+.or-tap{font-size:11px;color:var(–dim);animation:blink 1.5s infinite;position:relative;z-index:1}
+
+/* ===== SOUL PAGE ===== */
+.soul-hero{background:linear-gradient(135deg,rgba(201,162,39,.1),rgba(124,58,237,.07));border:1px solid var(–bdr);border-radius:14px;padding:16px;margin-bottom:13px;position:relative}
+.sh-top{display:flex;align-items:flex-start;gap:14px}
+.sh-icon{font-size:52px;flex-shrink:0}
+.sh-info{flex:1}
+.sh-name{font-family:‘Ma Shan Zheng’,serif;font-size:24px;margin-bottom:2px}
+.sh-titles{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.title-badge{font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(201,162,39,.12);border:1px solid var(–bdrB);color:var(–gold-l);font-weight:600}
+.sh-rank{font-size:12px;color:var(–dim);margin-bottom:8px}
+.sh-exp{margin-top:6px}
+.sh-exp-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.sh-exp-lbl{font-size:11px;color:var(–dim)}
+.sh-exp-val{font-size:11px;color:var(–gold-l);font-weight:600}
+.exp-b{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.exp-bf{height:100%;background:linear-gradient(90deg,var(–gold-d),var(–gold-l));border-radius:3px;transition:width .6s ease}
+.sh-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.sh-btn{padding:9px;border-radius:9px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;border:1px solid var(–bdr)}
+.sh-btn.primary{background:rgba(201,162,39,.12);border-color:var(–bdrB);color:var(–gold-l)}
+.sh-btn.primary:hover{background:rgba(201,162,39,.22)}
+.sh-btn.purple{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.4);color:#a78bfa}
+.sh-btn.purple:hover{background:rgba(124,58,237,.2)}
+.sh-btn.reset{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.25);color:#f87171;font-size:11px}
+.sh-btn.reset:hover{background:rgba(220,38,38,.15)}
+.sh-btn.equip{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3);color:#6ee7b7}
+
+/* STATS GRID */
+.stats-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.sbox{background:var(–bgc);border:1px solid var(–bdr);border-radius:10px;padding:9px 7px;text-align:center}
+.sbox .sv{font-size:17px;font-weight:700;color:var(–gold-l)}
+.sbox .sl{font-size:9px;color:var(–dim);margin-top:2px}
+
+/* RINGS DISPLAY */
+.ring-row{display:flex;gap:5px;flex-wrap:wrap;padding:4px 0}
+.rdot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.15);transition:all .2s;flex-shrink:0}
+.rdot.empty{background:rgba(255,255,255,.04)}
+
+/* SKILLS */
+.skill-item{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:9px;padding:9px 11px;margin-bottom:7px}
+.skill-name{font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:3px}
+.skill-desc{font-size:11px;color:var(–dim);line-height:1.55}
+.skill-params{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap}
+.skill-param{font-size:10px;background:rgba(124,58,237,.12);border-radius:4px;padding:1px 7px;color:#a78bfa}
+
+/* ARTIFACT SLOT */
+.art-slot{display:flex;align-items:center;gap:10px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.art-icon{font-size:28px;flex-shrink:0}
+.art-info{flex:1}
+.art-name{font-size:13px;font-weight:700;color:var(–legend)}
+.art-desc{font-size:11px;color:var(–dim);margin-top:2px}
+.art-power{font-size:11px;color:var(–gold);margin-top:2px}
+.art-btn{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;border:1px solid var(–bdrB);background:rgba(201,162,39,.1);color:var(–gold-l);cursor:pointer;flex-shrink:0}
+.art-btn.remove{border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.06);color:#f87171}
+.art-btn:hover{opacity:.8}
+
+/* HUNT PAGE */
+.zone-card{border-radius:13px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;cursor:pointer;transition:all .25s}
+.zone-card:hover{transform:translateY(-2px)}
+.zone-card.forest{background:linear-gradient(135deg,rgba(5,30,15,.95),rgba(0,20,10,.98));border:1px solid rgba(16,185,129,.3)}
+.zone-card.chaos{background:linear-gradient(135deg,rgba(50,10,80,.9),rgba(30,5,60,.95));border:1px solid rgba(139,92,246,.35)}
+.zone-card.primordial{background:linear-gradient(135deg,rgba(0,30,50,.95),rgba(0,15,35,.98));border:1px solid rgba(6,182,212,.3)}
+.zone-card.random{background:linear-gradient(135deg,rgba(40,30,5,.95),rgba(25,20,5,.98));border:1px solid rgba(201,162,39,.3)}
+.zone-card:hover .zone-inner{opacity:1}
+.zone-inner{opacity:.95;transition:opacity .2s}
+.zone-icon{font-size:32px;margin-bottom:8px}
+.zone-name{font-family:‘Ma Shan Zheng’,serif;font-size:18px;font-weight:700;margin-bottom:4px;letter-spacing:2px}
+.zone-desc{font-size:11px;color:var(–dim);line-height:1.6;margin-bottom:10px}
+.zone-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ztag{font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.07);color:var(–dim)}
+.zone-cost{font-size:12px;font-weight:700;color:var(–gold);display:inline-block;padding:5px 14px;border-radius:7px;background:rgba(201,162,39,.1);border:1px solid var(–bdrB)}
+.zone-deco{position:absolute;right:-10px;top:-10px;font-size:80px;opacity:.05;pointer-events:none}
+
+/* Recent rings list */
+.ring-item{display:flex;align-items:center;gap:9px;background:var(–bgc);border:1px solid var(–bdr);border-radius:9px;padding:9px 11px;margin-bottom:7px}
+.ring-orb{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:rgba(0,0,0,.7);flex-shrink:0}
+.ring-yr{font-weight:700;font-size:13px}
+.ring-sk{font-size:11px;color:var(–dim);margin-top:1px}
+
+/* HERB */
+.herb-item{display:flex;align-items:center;gap:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:9px;padding:9px 11px;margin-bottom:7px}
+.herb-icon{font-size:24px;flex-shrink:0}
+.herb-info{flex:1}
+.herb-name{font-size:13px;font-weight:700;color:var(–herb1)}
+.herb-effect{font-size:11px;color:var(–dim);margin-top:2px}
+.herb-use{padding:4px 11px;border-radius:7px;font-size:11px;font-weight:700;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.08);color:#86efac;cursor:pointer;flex-shrink:0}
+.herb-use:hover{background:rgba(34,197,94,.16)}
+
+/* LOTTERY PAGE */
+.ltabs{display:flex;gap:6px;margin-bottom:13px}
+.ltab{flex:1;padding:7px;border-radius:8px;text-align:center;border:1px solid var(–bdr);font-size:11px;cursor:pointer;transition:all .2s;color:var(–dim);line-height:1.4}
+.ltab.active{border-color:var(–bdrB);color:var(–gold-l);background:rgba(201,162,39,.1)}
+.l-banner{border-radius:12px;padding:16px;margin-bottom:12px;text-align:center;position:relative;overflow:hidden}
+.l-banner-title{font-family:‘Ma Shan Zheng’,serif;font-size:20px;font-weight:700;margin-bottom:4px;letter-spacing:3px}
+.l-banner-sub{font-size:11px;opacity:.65;margin-bottom:6px}
+.limited-badge{display:inline-block;font-size:10px;padding:2px 10px;border-radius:20px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;letter-spacing:1px}
+.l-btns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.lbtn{padding:13px 8px;border-radius:10px;border:1px solid var(–bdr);background:var(–bgc);cursor:pointer;transition:all .2s;text-align:center}
+.lbtn:hover{border-color:var(–bdrB)}
+.lbtn .ll{font-size:13px;font-weight:700;color:var(–txt);margin-bottom:3px}
+.lbtn .lc{font-size:11px;color:var(–gold)}
+.lbtn.ten{grid-column:span 2;background:linear-gradient(135deg,rgba(201,162,39,.1),rgba(201,162,39,.04))}
+.pool-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.pool-item:last-child{border-bottom:none}
+.pool-item .pi-name{color:var(–txt)}
+.pool-item .pi-prob{color:var(–gold)}
+.pool-item .pi-limited{color:#f87171;font-size:10px}
+
+/* TASKS PAGE */
+.task-item{display:flex;align-items:center;gap:9px;background:var(–bgc);border:1px solid var(–bdr);border-radius:10px;padding:11px;margin-bottom:7px}
+.task-ico{font-size:20px;flex-shrink:0}
+.task-body{flex:1}
+.task-name{font-size:12px;font-weight:600;margin-bottom:1px}
+.task-prog{font-size:10px;color:var(–dim)}
+.task-rew{font-size:11px;color:var(–gold);font-weight:700}
+.pbar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:5px}
+.pfill{height:100%;background:linear-gradient(90deg,var(–gold-d),var(–gold-l));border-radius:2px;transition:width .5s ease}
+.task-claim{padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;border:1px solid var(–bdrB);background:rgba(201,162,39,.1);color:var(–gold-l);cursor:pointer;transition:all .2s;flex-shrink:0}
+.task-claim.claimed{opacity:.35;cursor:default;border-color:var(–bdr)}
+.cultivate-info{font-size:11px;color:var(–dim);line-height:1.8;margin-bottom:10px}
+.cultivate-info span{color:var(–gold-l)}
+.cult-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cult-btn{padding:10px;border-radius:9px;text-align:center;border:1px solid var(–bdr);background:var(–bgc);cursor:pointer;transition:all .2s}
+.cult-btn:hover{border-color:var(–bdrB)}
+.cult-btn .cb-ico{font-size:20px;margin-bottom:3px}
+.cult-btn .cb-lbl{font-size:12px;font-weight:600}
+.cult-btn .cb-cnt{font-size:10px;color:var(–dim)}
+.cult-btn.disabled{opacity:.45;cursor:not-allowed}
+
+/* BAG PAGE */
+.bag-tabs{display:flex;gap:5px;margin-bottom:11px;overflow-x:auto}
+.bag-tabs::-webkit-scrollbar{display:none}
+.btab{flex-shrink:0;padding:4px 12px;border-radius:20px;border:1px solid var(–bdr);font-size:11px;color:var(–dim);cursor:pointer;transition:all .2s;white-space:nowrap}
+.btab.active{border-color:var(–bdrB);color:var(–gold-l);background:rgba(201,162,39,.1)}
+.bag-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.bag-item{aspect-ratio:1;border-radius:9px;background:var(–bgc);border:1px solid var(–bdr);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;padding:4px}
+.bag-item:hover{border-color:var(–bdrB);transform:scale(1.03)}
+.bag-item .bi-ico{font-size:24px}
+.bag-item .bi-name{font-size:9px;color:var(–dim);margin-top:2px;text-align:center;line-height:1.2}
+.bag-item .bi-cnt{position:absolute;top:3px;right:3px;font-size:9px;font-weight:700;color:var(–gold-l);background:rgba(0,0,0,.5);border-radius:3px;padding:1px 3px}
+.bag-item.herb .bi-name{color:var(–herb1)}
+
+/* MODAL BOTTOM SHEET */
+#modal{position:fixed;inset:0;z-index:280;background:rgba(0,0,0,.87);display:none;align-items:flex-end;justify-content:center}
+#modal.show{display:flex}
+.msheet{width:100%;max-width:430px;background:linear-gradient(180deg,#0f1628,#0a0f1e);border-top:1px solid var(–bdr);border-radius:20px 20px 0 0;padding:18px;max-height:80vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.msheet::-webkit-scrollbar{display:none}
+.mhandle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);margin:0 auto 14px}
+.m-title{font-family:‘Ma Shan Zheng’,serif;font-size:20px;text-align:center;margin-bottom:3px}
+.m-sub{text-align:center;font-size:11px;color:var(–dim);margin-bottom:14px}
+.m-sec{margin-bottom:12px}
+.m-sec-title{font-size:11px;color:var(–dim);display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.m-sec-title::before,.m-sec-title::after{content:’’;flex:1;height:1px;background:var(–bdr)}
+.m-attr-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.m-attr{background:rgba(201,162,39,.05);border:1px solid var(–bdr);border-radius:7px;padding:7px 9px}
+.m-attr-n{font-size:9px;color:var(–dim)}
+.m-attr-v{font-size:14px;font-weight:700;color:var(–gold-l)}
+.m-actions{display:flex;gap:7px;margin-top:12px}
+.m-btn{flex:1;padding:11px;border-radius:9px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;border:1px solid var(–bdr)}
+.m-btn.ok{background:rgba(201,162,39,.14);border-color:var(–bdrB);color:var(–gold-l)}
+.m-btn.ok:hover{background:rgba(201,162,39,.25)}
+.m-btn.bad{background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.3);color:#f87171}
+.m-btn.grn{background:rgba(16,185,129,.07);border-color:rgba(16,185,129,.3);color:#6ee7b7}
+
+/* RING FUSION PAGE (sub-page) */
+#page-fusion{display:none;padding:12px}
+#page-fusion.active{display:block}
+.fusion-circles{display:flex;align-items:center;justify-content:center;gap:14px;margin:16px 0}
+.f-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(–bdrB);background:radial-gradient(ellipse,rgba(20,28,53,.95),rgba(5,8,16,.98));font-size:10px;color:var(–dim);cursor:pointer;transition:all .2s;position:relative}
+.f-circle.filled{border-color:var(–gold);background:rgba(201,162,39,.08)}
+.f-circle:hover{border-color:var(–gold-l)}
+.f-plus{font-size:22px;color:var(–dim)}
+.f-result{width:90px;height:90px;font-size:11px}
+.fusion-herbs{margin-bottom:14px}
+.fh-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.fh-slot{width:50px;height:50px;border-radius:9px;border:1px solid var(–bdr);background:var(–bgc);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all .2s;position:relative}
+.fh-slot:hover{border-color:rgba(34,197,94,.4)}
+.fh-slot.filled{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.06)}
+.fh-remove{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:rgba(220,38,38,.8);font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff}
+.fusion-rates{background:rgba(201,162,39,.06);border:1px solid var(–bdr);border-radius:10px;padding:11px;margin-bottom:14px}
+.fr-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.fr-row .fr-l{color:var(–dim)}
+.fr-row .fr-v{color:var(–gold-l);font-weight:600}
+.fusion-btn{width:100%;padding:14px;border-radius:11px;border:1px solid var(–bdrB);background:linear-gradient(135deg,rgba(201,162,39,.2),rgba(201,162,39,.06));color:var(–gold-l);font-family:‘Ma Shan Zheng’,serif;font-size:18px;letter-spacing:4px;cursor:pointer;transition:all .3s}
+.fusion-btn:hover{background:linear-gradient(135deg,rgba(201,162,39,.35),rgba(201,162,39,.12));box-shadow:0 0 18px rgba(201,162,39,.35)}
+.fusion-btn:disabled{opacity:.4;cursor:not-allowed}
+.back-btn{display:flex;align-items:center;gap:5px;font-size:13px;color:var(–dim);cursor:pointer;margin-bottom:12px;padding:4px 0}
+.back-btn:hover{color:var(–gold-l)}
+
+/* PATHS */
+.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pcard{border-radius:11px;padding:13px;border:1px solid var(–bdr);cursor:pointer;transition:all .2s;background:var(–bgc)}
+.pcard:hover{border-color:var(–bdrB);transform:scale(1.02)}
+.pcard.locked{opacity:.5;cursor:not-allowed}
+.pcard .pc-ico{font-size:26px;margin-bottom:5px}
+.pcard .pc-name{font-family:‘Ma Shan Zheng’,serif;font-size:13px;color:var(–gold-l);margin-bottom:2px}
+.pcard .pc-desc{font-size:10px;color:var(–dim);line-height:1.4}
+.pcard .pc-req{font-size:10px;color:var(–apex);margin-top:3px}
+
+/* UTILS */
+.empty-state{text-align:center;padding:34px 16px;color:var(–dim)}
+.empty-state .ei{font-size:42px;margin-bottom:10px}
+.empty-state .em{font-size:13px}
+.btn{padding:9px 16px;border-radius:9px;border:1px solid var(–bdrB);background:rgba(201,162,39,.1);color:var(–gold-l);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(201,162,39,.2)}
+.btn:active{transform:scale(.97)}
+.section-divider{height:1px;background:var(–bdr);margin:12px 0}
+</style>
+
+</head>
+<body>
+<canvas id="ptc"></canvas>
+<div id="star-bg"></div>
+<div id="app">
+
+<!-- TOP BAR -->
+
+<div id="topbar">
+  <div class="tb-row">
+    <div class="tb-title">斗罗觉醒</div>
+    <div class="tb-stats">
+      <div class="pill">⚡ <span id="hud-lv">Lv.1</span></div>
+      <div class="pill">💫 <span id="hud-soul">1000</span></div>
+    </div>
+  </div>
+  <div class="exp-row">
+    <div class="exp-bar-wrap"><div class="exp-bar-fill" id="exp-fill" style="width:0%"></div></div>
+    <div class="exp-label" id="exp-label">0 / 100 EXP</div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+
+<div id="notif"></div>
+
+<!-- CONTENT -->
+
+<div id="content">
+
+  <!-- ===== PAGE: SOUL (武魂+总览合并) ===== -->
+
+  <div class="page active" id="page-soul">
+    <!-- 会动态渲染 -->
+  </div>
+
+  <!-- ===== PAGE: HUNT ===== -->
+
+  <div class="page" id="page-hunt">
+    <div class="sh"><div class="st">魂环狩猎</div><div style="font-size:11px;color:var(--dim)">狩猎: <span id="hunt-cnt" style="color:var(--gold-l);font-weight:700">0</span> 次</div></div>
+
+```
+<div class="zone-card forest" onclick="hunt('forest')">
+  <div class="zone-deco">🌲</div>
+  <div class="zone-inner">
+    <div class="zone-icon">🌲</div>
+    <div class="zone-name" style="color:#6ee7b7">星斗大森林</div>
+    <div class="zone-desc">广袤的原始森林，栖息着各类强大魂兽。可获取魂环、魂骨与稀有药草。</div>
+    <div class="zone-tags"><span class="ztag">🔮 百年~万年魂环</span><span class="ztag">🌿 有概率获取药草</span><span class="ztag">👑 1% 称号</span></div>
+    <div class="zone-cost">100 魂力</div>
+  </div>
+</div>
+
+<div class="zone-card chaos" onclick="hunt('chaos')">
+  <div class="zone-deco">🌀</div>
+  <div class="zone-inner">
+    <div class="zone-icon">🌀</div>
+    <div class="zone-name" style="color:#c084fc">混沌之地</div>
+    <div class="zone-desc">混沌与秩序交界处，隐藏着超越常识的力量。有概率获取不可估量魂环。</div>
+    <div class="zone-tags"><span class="ztag">💜 万年~不可估量魂环</span><span class="ztag">🌿 稀有药草</span><span class="ztag">👑 1% 称号</span></div>
+    <div class="zone-cost">500 魂力</div>
+  </div>
+</div>
+
+<div class="zone-card primordial" onclick="hunt('primordial')">
+  <div class="zone-deco">🌌</div>
+  <div class="zone-inner">
+    <div class="zone-icon">🌌</div>
+    <div class="zone-name" style="color:#67e8f9">原初之地</div>
+    <div class="zone-desc">宇宙诞生之所，藏有亘古魂环与唯一的宇宙之核。入口极其稀少，获取宇宙之核概率仅 0.0000000001%。</div>
+    <div class="zone-tags"><span class="ztag">🔵 不可估量~神赐魂环</span><span class="ztag">✨ 极稀有药草</span><span class="ztag">👑 1% 称号</span></div>
+    <div class="zone-cost">1000 魂力</div>
+  </div>
+</div>
+
+<div class="zone-card random" onclick="hunt('random')">
+  <div class="zone-deco">🎲</div>
+  <div class="zone-inner">
+    <div class="zone-icon">🎲</div>
+    <div class="zone-name" style="color:var(--gold-l)">随机传送</div>
+    <div class="zone-desc">被随机传送至未知区域，可能是天堂也可能是炼狱。高风险高回报，一切未知。</div>
+    <div class="zone-tags"><span class="ztag">❓ 随机一切</span><span class="ztag">🌿 随机药草</span><span class="ztag">👑 1% 称号</span></div>
+    <div class="zone-cost">300 魂力</div>
+  </div>
+</div>
+
+<div class="sh" style="margin-top:6px"><div class="st">最近获取</div></div>
+<div id="recent-rings">
+  <div class="empty-state"><div class="ei">💫</div><div class="em">尚未狩猎</div></div>
+</div>
+```
+
+  </div>
+
+  <!-- ===== PAGE: LOTTERY (星运) ===== -->
+
+  <div class="page" id="page-lottery">
+    <div class="sh">
+      <div class="st">星运抽取</div>
+      <div style="font-size:11px;color:var(--dim)">总计: <span id="lot-total" style="color:var(--gold-l);font-weight:700">0</span> 次</div>
+    </div>
+
+```
+<div class="ltabs">
+  <div class="ltab active" onclick="switchLot(0,this)">普通<br/><small style="font-size:9px">100/次</small></div>
+  <div class="ltab" onclick="switchLot(1,this)">高级<br/><small style="font-size:9px">500/次</small></div>
+  <div class="ltab" onclick="switchLot(2,this)">顶级<br/><small style="font-size:9px">1000/次</small></div>
+</div>
+
+<div class="l-banner" id="l-banner">
+  <div class="l-banner-title" id="lb-title">普通奖池</div>
+  <div class="l-banner-sub" id="lb-sub">基础奖励 · 魂力可期</div>
+  <div class="limited-badge">🔥 限时稀有物品概率 ×2</div>
+</div>
+
+<div class="l-btns">
+  <div class="lbtn" onclick="doLot(1)"><div class="ll">单次抽取</div><div class="lc" id="lc1">×100 魂力</div></div>
+  <div class="lbtn" onclick="doLot(5)"><div class="ll">五连抽取</div><div class="lc" id="lc5">×500 魂力</div></div>
+  <div class="lbtn ten" onclick="doLot(10)"><div class="ll">✨ 十连抽取（特别概率）✨</div><div class="lc" id="lc10">×1000 魂力</div></div>
+</div>
+
+<div class="sh"><div class="st">奖池详情</div></div>
+<div class="card" id="pool-detail"></div>
+
+<div class="sh" style="margin-top:6px"><div class="st">抽取记录</div></div>
+<div id="lot-history"><div class="empty-state"><div class="ei">🎲</div><div class="em">尚未抽取</div></div></div>
+```
+
+  </div>
+
+  <!-- ===== PAGE: TASKS ===== -->
+
+  <div class="page" id="page-tasks">
+    <div class="sh"><div class="st">修炼 · 任务</div><div style="font-size:11px;color:var(--dim)">今日获取: <span id="daily-earned" style="color:var(--gold-l);font-weight:700">0</span></div></div>
+
+```
+<div class="card">
+  <div class="st" style="margin-bottom:10px">魂力修炼</div>
+  <div class="cultivate-info">
+    挂机: <span>+1/秒</span> (日限1000) &nbsp;|&nbsp; 在线: <span>+100/分钟</span>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+    <span style="font-size:11px;color:var(--dim)">修炼进度 (今日)</span>
+    <span style="font-size:11px;color:var(--gold-l)" id="idle-txt">0 / 1000</span>
+  </div>
+  <div class="pbar"><div class="pfill" id="idle-bar" style="width:0%"></div></div>
+  <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+    <span style="font-size:11px;color:var(--dim)">探索进度 (今日)</span>
+    <span style="font-size:11px;color:var(--gold-l)" id="explore-txt">0 / 5000</span>
+  </div>
+  <div class="pbar"><div class="pfill" id="explore-bar" style="width:0%"></div></div>
+  <div class="cult-btns" style="margin-top:12px">
+    <div class="cult-btn" id="btn-cultivate" onclick="cultivate()">
+      <div class="cb-ico">🧘</div>
+      <div class="cb-lbl">修炼 (+200)</div>
+      <div class="cb-cnt" id="cult-cnt">今日: 0/10</div>
+    </div>
+    <div class="cult-btn" id="btn-explore" onclick="explore()">
+      <div class="cb-ico">🌲</div>
+      <div class="cb-lbl">探索 (+500)</div>
+      <div class="cb-cnt" id="expl-cnt">今日: 0/10</div>
+    </div>
+  </div>
+</div>
+
+<div class="sh"><div class="st">日常任务</div><button class="btn" onclick="refreshTasks()">刷新</button></div>
+<div id="daily-tasks"></div>
+
+<div class="sh" style="margin-top:6px"><div class="st">🔮 隐藏任务</div></div>
+<div id="hidden-tasks"><div class="empty-state"><div class="ei">🎯</div><div class="em">尚无隐藏任务</div></div></div>
+```
+
+  </div>
+
+  <!-- ===== PAGE: BAG ===== -->
+
+  <div class="page" id="page-bag">
+    <div class="sh"><div class="st">背包</div></div>
+    <div class="bag-tabs" id="bag-tabs">
+      <div class="btab active" onclick="filterBag('all',this)">全部</div>
+      <div class="btab" onclick="filterBag('ring',this)">魂环</div>
+      <div class="btab" onclick="filterBag('bone',this)">魂骨</div>
+      <div class="btab" onclick="filterBag('artifact',this)">神器</div>
+      <div class="btab" onclick="filterBag('herb',this)">药草 🌿</div>
+      <div class="btab" onclick="filterBag('title',this)">称号</div>
+    </div>
+    <div class="bag-grid" id="bag-grid"></div>
+  </div>
+
+  <!-- ===== PAGE: RING FUSION (sub) ===== -->
+
+  <div id="page-fusion">
+    <div class="back-btn" onclick="closeFusion()">← 返回背包</div>
+    <div class="sh"><div class="st">魂环融合</div></div>
+
+```
+<div class="card">
+  <div style="font-size:12px;color:var(--dim);margin-bottom:10px;line-height:1.7">
+    选择两个魂环进行融合，有概率提升品质年份。添加药草可提升成功率和质变概率。
+  </div>
+  <div class="fusion-circles">
+    <div class="f-circle" id="fc-a" onclick="selectFusionRing('a')">
+      <div id="fc-a-ico" style="font-size:22px">⭕</div>
+      <div id="fc-a-name" style="font-size:9px;margin-top:2px;text-align:center">选择魂环A</div>
+    </div>
+    <div class="f-plus">+</div>
+    <div class="f-circle" id="fc-b" onclick="selectFusionRing('b')">
+      <div id="fc-b-ico" style="font-size:22px">⭕</div>
+      <div id="fc-b-name" style="font-size:9px;margin-top:2px;text-align:center">选择魂环B</div>
+    </div>
+    <div style="font-size:18px;color:var(--dim)">=</div>
+    <div class="f-circle f-result" id="fc-result">
+      <div style="font-size:24px">✨</div>
+      <div style="font-size:9px;margin-top:2px;text-align:center;color:var(--dim)">融合结果</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="st" style="margin-bottom:10px">添加药草（可选）</div>
+  <div class="fh-row" id="fusion-herbs-row">
+    <div class="fh-slot" onclick="addFusionHerb(0)" id="fhs-0"><span style="font-size:20px">+</span></div>
+    <div class="fh-slot" onclick="addFusionHerb(1)" id="fhs-1"><span style="font-size:20px">+</span></div>
+    <div class="fh-slot" onclick="addFusionHerb(2)" id="fhs-2"><span style="font-size:20px">+</span></div>
+  </div>
+</div>
+
+<div class="fusion-rates card" id="fusion-rates">
+  <div class="fr-row"><span class="fr-l">基础成功率</span><span class="fr-v" id="fr-base">50%</span></div>
+  <div class="fr-row"><span class="fr-l">药草加成</span><span class="fr-v" id="fr-herb-bonus">+0%</span></div>
+  <div class="fr-row"><span class="fr-l">最终成功率</span><span class="fr-v" id="fr-final">50%</span></div>
+  <div class="fr-row"><span class="fr-l">质变概率</span><span class="fr-v" id="fr-mutate">1%</span></div>
+  <div class="fr-row"><span class="fr-l">药草质变加成</span><span class="fr-v" id="fr-herb-mutate">+0%</span></div>
+</div>
+
+<button class="fusion-btn" id="fusion-exec-btn" onclick="executeFusion()">⚗ 开始融合 ⚗</button>
+```
+
+  </div>
+
+</div><!-- end content -->
+
+<!-- BOTTOM NAV -->
+
+<nav id="bnav">
+  <div class="ni active" onclick="navTo('soul',this)"><div class="ico">⚡</div><div class="lbl">武魂</div></div>
+  <div class="ni" onclick="navTo('hunt',this)"><div class="ico">🔮</div><div class="lbl">狩猎</div></div>
+  <div class="ni" onclick="navTo('lottery',this)"><div class="ico">🌟</div><div class="lbl">星运</div></div>
+  <div class="ni" onclick="navTo('tasks',this)"><div class="ico">📋</div><div class="lbl">任务</div></div>
+  <div class="ni" onclick="navTo('bag',this)"><div class="ico">🎒</div><div class="lbl">背包</div></div>
+</nav>
+
+</div><!-- end app -->
+
+<!-- AWAKEN SCREEN -->
+
+<div id="screen-awaken">
+  <div class="aw-glow"></div>
+  <div class="aw-title">武魂觉醒</div>
+  <div class="aw-sub">触碰祭坛，感应属于你的武魂</div>
+  <div class="aw-circle" id="aw-altar" onclick="triggerAwaken()">
+    <div class="aw-ring1"></div><div class="aw-ring2"></div><div class="aw-ring3"></div>
+    <div class="aw-icon">🌀</div>
+    <div class="aw-hint">点击觉醒</div>
+  </div>
+  <button class="aw-btn" onclick="triggerAwaken()">✦ 感应武魂 ✦</button>
+</div>
+
+<!-- AWAKEN RESULT OVERLAY -->
+
+<div id="ov-result" onclick="closeResult()">
+  <div class="or-burst" id="or-burst"></div>
+  <div class="or-icon" id="or-icon">⚡</div>
+  <div class="or-q" id="or-q">传说品质</div>
+  <div class="or-name" id="or-name">蓝电霸王龙</div>
+  <div class="or-desc" id="or-desc">描述</div>
+  <div class="or-stats">
+    <div class="or-stat"><div class="v" id="or-pow">10</div><div class="l">初始魂力</div></div>
+    <div class="or-stat"><div class="v" id="or-attr">雷·龙</div><div class="l">属性</div></div>
+    <div class="or-stat"><div class="v" id="or-q2">传说</div><div class="l">品质</div></div>
+  </div>
+  <div class="or-tap">点击任意处继续</div>
+</div>
+
+<!-- MODAL -->
+
+<div id="modal" onclick="closeModal(event)">
+  <div class="msheet" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- RING SELECTOR FOR FUSION -->
+
+<div id="ring-sel-modal" onclick="closeRingSel()" style="position:fixed;inset:0;z-index:350;background:rgba(0,0,0,.9);display:none;align-items:flex-end;justify-content:center">
+  <div class="msheet" onclick="event.stopPropagation()" style="max-height:70vh">
+    <div class="mhandle"></div>
+    <div class="m-title">选择魂环</div>
+    <div id="ring-sel-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  DATA TABLES
+// ══════════════════════════════════════════════════
+const QUALITY_CFG={
+  common:   {n:"普通",  c:"#9ca3af", p:20,  bc:"rgba(156,163,175,.4)"},
+  rare:     {n:"稀有",  c:"#3b82f6", p:25,  bc:"rgba(59,130,246,.55)"},
+  epic:     {n:"史诗",  c:"#8b5cf6", p:22,  bc:"rgba(139,92,246,.6)"},
+  legend:   {n:"传说",  c:"#f59e0b", p:18,  bc:"rgba(245,158,11,.6)"},
+  apex:     {n:"顶级",  c:"#ef4444", p:8,   bc:"rgba(239,68,68,.7)"},
+  hc:       {n:"普通隐藏",c:"#10b981",p:3.5, bc:"rgba(16,185,129,.6)"},
+  ha:       {n:"顶级隐藏",c:"#ec4899",p:2,   bc:"rgba(236,72,153,.7)"},
+  twin:     {n:"双生武魂",c:"#f0abfc",p:1,   bc:"rgba(240,171,252,.7)"},
+  triple:   {n:"三生武魂",c:"#ffffff", p:0.3, bc:"rgba(255,255,255,.5)"},
+};
+
+const SOUL_DB={
+  common:[
+    {n:"蓝银草",i:"🌿",d:"最平凡的草系武魂，蕴含无限可能的神奇底蕴。",a:["草"],p:1},
+    {n:"镰刀",i:"⚔️",d:"普通农器武魂，修炼潜力有限。",a:["金属"],p:1},
+    {n:"香草",i:"🌸",d:"散发淡淡清香的植物武魂。",a:["自然"],p:2},
+    {n:"木棍",i:"🪄",d:"最朴实无华的器武魂。",a:["木"],p:1},
+    {n:"小刀",i:"🗡️",d:"轻巧的切割系武魂。",a:["金属"],p:2},
+    {n:"含羞草",i:"🌱",d:"遇敌防御增强的植物武魂。",a:["草","防御"],p:2},
+  ],
+  rare:[
+    {n:"白虎",i:"🐯",d:"百兽之王，拥有卓越的力量与速度，天生战将。",a:["兽","力量"],p:5},
+    {n:"火凤凰",i:"🔥",d:"凤凰一族，拥有圣洁的火焰之力，不死重生。",a:["火","凤凰"],p:6},
+    {n:"冰凤凰",i:"❄️",d:"冰系凤凰，令人胆寒的霜雪之力，冻结万物。",a:["冰","凤凰"],p:6},
+    {n:"盘龙棍",i:"🐉",d:"器武魂中的佼佼者，龙形缠绕蕴含破坏力。",a:["龙","器"],p:5},
+    {n:"七宝琉璃塔",i:"🗼",d:"天下第一辅助武魂，可增幅队友多方面属性。",a:["辅助","光"],p:7},
+    {n:"幽冥灵猫",i:"🐱",d:"速度极快的暗系兽武魂，来去无影。",a:["暗","速度"],p:5},
+    {n:"碧磷蛇皇",i:"🐍",d:"毒系蛇类武魂，致命的毒素与强大的缠绕之力。",a:["毒","蛇"],p:6},
+    {n:"金龙爪",i:"🦅",d:"爪系器武魂，拥有锋利龙爪的穿透破坏力。",a:["龙","锋利"],p:6},
+    {n:"黑蛇皇",i:"🐍",d:"暗系蛇类武魂，拥有腐蚀与催眠双重特性。",a:["暗","毒"],p:5},
+    {n:"朱雀圣火",i:"🦜",d:"南方火之神鸟，纯粹的炎属性武魂。",a:["火","神鸟"],p:6},
+  ],
+  epic:[
+    {n:"蓝电霸王龙",i:"⚡",d:"龙类武魂顶端，闪电与龙力的完美结合，百兽臣服。",a:["雷","龙","霸王"],p:8},
+    {n:"昊天锤",i:"🔨",d:"昊天宗镇宗至宝，器武魂传奇，天下无物不可破。",a:["力量","混沌"],p:9},
+    {n:"六翼天使",i:"👼",d:"神级血脉武魂，先天魂力20级，神灵代言之体。",a:["神圣","光明","飞行"],p:9},
+    {n:"泰坦巨猿",i:"🦍",d:"力量系武魂极品，拥有毁天灭地的蛮力。",a:["力量","大地"],p:8},
+    {n:"噬魂蛛皇",i:"🕷️",d:"蛛类武魂之皇，精神力与陷阱双重恐怖。",a:["精神","毒","蜘蛛"],p:8},
+    {n:"死亡蛛皇",i:"💀",d:"死亡属性蛛皇，令人心悸的黑暗力量。",a:["死亡","暗","精神"],p:9},
+    {n:"冰碧帝皇蝎",i:"🦂",d:"冰系帝皇蝎，冰与毒的完美融合，封印一切。",a:["冰","毒","帝皇"],p:8},
+    {n:"烈火剑圣",i:"🔥",d:"剑与火焰合一，斩杀与焚烧并存的强大武魂。",a:["火","剑","圣"],p:8},
+  ],
+  legend:[
+    {n:"九宝琉璃塔",i:"✨",d:"七宝琉璃塔进化体，天下第一辅助，传说级存在。",a:["辅助","光明","神圣"],p:12},
+    {n:"蓝银皇",i:"👑",d:"蓝银草皇者血脉传承，最强控制系武魂，万草之皇。",a:["控制","草","皇者"],p:13},
+    {n:"堕落天使",i:"😈",d:"与神圣天使对立的黑暗天使，充满颠覆与破坏之力。",a:["暗","堕落","天使"],p:12},
+    {n:"极品火凤凰",i:"🌋",d:"世界最强火系武魂，极致火焰可焚尽一切。",a:["极致之火","凤凰","毁灭"],p:14},
+    {n:"金龙王",i:"🐲",d:"龙中之王，无上龙族血脉，力量无可比拟。",a:["极致之力","龙王","血脉"],p:14},
+    {n:"海神武魂",i:"🌊",d:"神赐武魂，历代海神守护者所有，掌控汪洋。",a:["神力","水","海"],p:13},
+    {n:"七杀剑",i:"🗡️",d:"天下第一攻击武魂，七重杀意凝聚，无物不斩。",a:["极致之刃","杀意","剑"],p:14},
+    {n:"雷灵王",i:"⚡",d:"雷霆极致武魂，召唤九天雷霆降临于敌。",a:["雷","王者","天空"],p:13},
+  ],
+  apex:[
+    {n:"神圣天使",i:"😇",d:"神级血脉武魂，先天魂力20级，神灵真正的代行者。",a:["极致之光","神圣","天使","神力"],p:17},
+    {n:"柔骨兔王",i:"🐇",d:"小舞独有，传承月兔之神神秘血脉，无可比拟。",a:["神秘","月","灵魂"],p:16},
+    {n:"混沌属性",i:"🌀",d:"极罕见的混沌属性武魂，凌驾于一切属性之上。",a:["混沌","无序","万有"],p:19},
+    {n:"宇宙之源",i:"🌌",d:"掌管宇宙规则的武魂，理论上不可存在却存在了。",a:["宇宙","规则","万物"],p:20},
+  ],
+  hc:[
+    {n:"如意环",i:"⭕",d:"由昊天锤变异而来，自带领域之力的隐藏武魂。",a:["隐匿","领域","混沌"],p:11},
+    {n:"幽冥之眼",i:"👁️",d:"窥视冥界的神秘眼睛武魂，洞察一切。",a:["死亡","洞察","冥界"],p:10},
+    {n:"九心海棠",i:"🌺",d:"天下第一治愈武魂，同时只能两名魂师拥有。",a:["治愈","生命","神圣"],p:11},
+    {n:"奇茸通天菊",i:"🌼",d:"极罕见植物武魂，通天彻地之力。",a:["自然","治愈","通灵"],p:10},
+  ],
+  ha:[
+    {n:"昊天九绝锤",i:"⚡🔨",d:"昊天锤终极形态，毁灭一切的绝世之力。",a:["混沌","极致之力","毁灭","昊天"],p:18},
+    {n:"饕餮神牛",i:"🐂",d:"龙神九子之一，吞噬天地之力令一切恐惧。",a:["吞噬","大地","龙神"],p:17},
+    {n:"死神镰刀",i:"💀⚔️",d:"死神降临之器，可斩断生死轮回。",a:["死亡","斩断","混沌"],p:18},
+  ],
+  twin:[
+    {n:"蓝银草+昊天锤",i:"🌿⚡",d:"史上最强双生武魂，控制与力量的完美融合。",a:["草","力量","控制","双生"],p:21,twin:true},
+    {n:"圣天使+堕天使",i:"😇😈",d:"光明与黑暗的双生，阴阳并存超越极限。",a:["光明","黑暗","天使","双生"],p:23,twin:true},
+    {n:"金龙+银龙",i:"🐲🐉",d:"龙神血脉双重传承，无上神威降世。",a:["龙神","金银","极致","双生"],p:26,twin:true},
+    {n:"冰火双凤",i:"❄️🔥",d:"冰与火并存的双生凤凰，对立统一之力。",a:["冰","火","凤凰","双生"],p:23,twin:true},
+  ],
+  triple:[
+    {n:"冰火雷三生龙",i:"⚡🔥❄️",d:"三生武魂极致存在，三种属性龙族武魂并存。",a:["冰","火","雷","龙","三生"],p:31,triple:true},
+    {n:"昊天极光混沌三生",i:"🔨✨🌀",d:"传说三生武魂，包含三种最强武魂属性融合。",a:["混沌","极光","昊天","三生"],p:36,triple:true},
+  ]
+};
+
+const RING_TIERS=[
+  {n:"百年",  y:100,        c:"#a78bfa", skills:["强化体质","感知提升","速度小提升","防御加强"]},
+  {n:"千年",  y:1000,       c:"#60a5fa", skills:["元素亲和","属性共鸣","魂力恢复","感知扩展"]},
+  {n:"万年",  y:10000,      c:"#34d399", skills:["领域破开","属性变异","精神力提升","真实伤害"]},
+  {n:"十万年",y:100000,     c:"#fbbf24", skills:["领域降临","属性极化","时间感知","神通萌芽"]},
+  {n:"百万年",y:1000000,    c:"#f87171", skills:["时空法则触碰","神通降临","属性逆转","混沌感知"]},
+  {n:"不可估量",y:999999999,c:"#e879f9", skills:["混沌法则","空间撕裂","时间停滞","因果逆转"]},
+  {n:"神赐",  y:9999999999, c:"#fffbeb", skills:["神力灌注","神赐领域","超越肉体","不死之身"],special:true},
+  {n:"宇宙之核",y:99999999999999,c:"#00ffff",skills:["宇宙意志","规则掌控","虚空创生","你即宇宙"],unique:true},
+];
+
+const HERBS=[
+  {id:"qingling",n:"清灵草",i:"🌿",c:"#22c55e",effect:"魂力",value:200,
+   desc:"可直接增加200魂力，草系武魂吸收效果双倍。",
+   fusionBonus:{successRate:5,mutateRate:1}},
+  {id:"tiancai",n:"天材宝草",i:"🌱",c:"#a3e635",effect:"exp",value:150,
+   desc:"服用后获得150点经验，品质越高武魂获取越多。",
+   fusionBonus:{successRate:8,mutateRate:2}},
+  {id:"xingchen",n:"星辰花",i:"🌸",c:"#f9a8d4",effect:"luck",value:10,
+   desc:"增加星运抽奖幸运值10点，持续至下次抽奖。",
+   fusionBonus:{successRate:3,mutateRate:3}},
+  {id:"hunying",n:"魂凝果",i:"🍇",c:"#7c3aed",effect:"fusion",value:0,
+   desc:"专用于魂环融合，大幅提升融合成功率与质变力。",
+   fusionBonus:{successRate:15,mutateRate:8}},
+  {id:"jitian",n:"极天灵芝",i:"🍄",c:"#f97316",effect:"exp",value:500,
+   desc:"极品药草，服用后获得500点经验，灵气充盈。",
+   fusionBonus:{successRate:12,mutateRate:5}},
+  {id:"wanling",n:"万灵液",i:"💧",c:"#38bdf8",effect:"魂力",value:1000,
+   desc:"凝聚万物灵气，直接增加1000魂力。",
+   fusionBonus:{successRate:10,mutateRate:4}},
+  {id:"shengen",n:"神根草",i:"🌾",c:"#fde68a",effect:"fusion",value:0,
+   desc:"神级药草，极大提升融合质变概率，万金难求。",
+   fusionBonus:{successRate:20,mutateRate:15}},
+];
+
+const ARTIFACTS=[
+  {id:"tianqing",n:"天青石髓",i:"💎",d:"凝聚天地精华的宝石，服用可大幅提升魂力。",power:500},
+  {id:"jiutian",n:"九天仙草",i:"🌿",d:"万年难遇的仙草，服用者可突破修炼瓶颈。",power:1000},
+  {id:"shenlonxin",n:"神龙心脏",i:"❤️",d:"古神龙遗留，蕴含无尽龙力与不灭生命力。",power:2000},
+  {id:"sanscha",n:"海神三叉戟",i:"🔱",d:"海神使用过的神器，拥有海神之力的记忆。",power:3000},
+  {id:"pojie",n:"破界神剑",i:"⚔️",d:"传说可斩断规则的神级武器，诸天之斩。",power:5000},
+  {id:"huanzhuzhu",n:"混沌珠",i:"🌀",d:"混沌之初凝聚的能量核心，属性混沌无属。",power:4000},
+  {id:"yuzhou",n:"宇宙碎片",i:"🌌",d:"宇宙诞生时遗留的碎片，蕴含宇宙法则。",power:8000},
+];
+
+const BONE_TYPES=[
+  {n:"头部魂骨",i:"💀",s:"head"},{n:"躯干魂骨",i:"🦴",s:"body"},
+  {n:"左臂魂骨",i:"💪",s:"la"},{n:"右臂魂骨",i:"💪",s:"ra"},
+  {n:"左腿魂骨",i:"🦵",s:"ll"},{n:"右腿魂骨",i:"🦵",s:"rl"},
+];
+
+const TITLE_DB={
+  rare:[
+    {n:"幽冥行者",c:"#8b5cf6",d:"踏入深渊不回头的修炼者。"},
+    {n:"炎灵使者",c:"#f97316",d:"与火焰共鸣的天才魂师。"},
+    {n:"雷霆斗士",c:"#60a5fa",d:"雷属性觉醒的强大战士。"},
+    {n:"冰雪女王",c:"#a5f3fc",d:"掌控冰雪的绝世天才。"},
+    {n:"暗影刺客",c:"#6366f1",d:"藏于黑暗的致命存在。"},
+  ],
+  advanced:[
+    {n:"破天一剑",c:"#fbbf24",d:"以一剑之力破开天际。"},
+    {n:"神通宗师",c:"#f59e0b",d:"神通之力已达宗师境界。"},
+    {n:"龙魂觉醒",c:"#f97316",d:"龙族血脉觉醒的传说魂师。"},
+    {n:"万古魂帝",c:"#d97706",d:"万古难遇的顶尖魂帝。"},
+  ],
+  legend:[
+    {n:"斗罗天帝",c:"#ef4444",d:"凌驾于斗罗之上的天帝。"},
+    {n:"混沌魔神",c:"#dc2626",d:"混沌之力的掌控者，魔神降临。"},
+    {n:"宇宙法则者",c:"#ff6b6b",d:"触碰宇宙法则的绝世强者。"},
+    {n:"永恒之主",c:"#f87171",d:"永恒与时间的掌控者。"},
+  ],
+  hunt:[
+    {n:"猎魂先驱",c:"#6ee7b7",d:"无数次踏入危险之地的勇士。"},
+    {n:"星斗传说",c:"#67e8f9",d:"在星斗大森林中成为传说。"},
+    {n:"混沌探索者",c:"#c084fc",d:"踏入混沌之地并生还之人。"},
+    {n:"原初触碰者",c:"#00ffff",d:"触碰原初之地秘密的存在。"},
+  ],
+  special:[
+    {n:"欧皇",c:"#ffd700",d:"传说中的幸运之神降临者，下次抽取必中顶级！"},
+  ],
+};
+
+// ══════════════════════════════════════════════════
+//  GAME STATE
+// ══════════════════════════════════════════════════
+function defaultState(){
+  return{
+    sp:1000,    // soul power (魂力)
+    exp:0,      // experience
+    level:1,
+    awakenDone:false,
+    soul:null,  // single soul object
+    bag:[],     // {type,data,count,id}
+    bones:[],   // equipped bones
+    equippedArt:null,  // equipped artifact
+    titles:[],
+    tasks:[],
+    taskRT:0,
+    cultCount:0,    // today cultivate count
+    explCount:0,    // today explore count
+    dailyEarned:0,
+    idleEarned:0,
+    explEarned:0,
+    huntCount:0,
+    lotTotal:0,
+    lotMode:0,
+    lotHistory:[],
+    recentRings:[],
+    cosmicOwned:false,
+    ouhuang:false,
+    luckBonus:0,  // from star herb
+    stats:{awakens:0,rings:0,bones:0,arts:0,hunts:0},
+    lastSave:Date.now(),
+    pathsOpen:[],
+  };
+}
+
+let G = loadState() || defaultState();
+let curLotMode = G.lotMode||0;
+let curBagFilter='all';
+let fusionState={a:null,b:null,herbs:[]};
+let fusionSelTarget=null;
+let fusionHerbTarget=null;
+
+function saveState(){try{localStorage.setItem('douluo_v2',JSON.stringify(G));}catch(e){}}
+function loadState(){try{const s=localStorage.getItem('douluo_v2');return s?JSON.parse(s):null;}catch(e){return null;}}
+
+// ══════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════
+const rand=(max)=>Math.random()*max;
+const ri=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+const pick=(arr)=>arr[ri(0,arr.length-1)];
+
+function wPick(arr,key){
+  const tot=arr.reduce((s,i)=>s+(i[key]||0),0);
+  let r=Math.random()*tot,c=0;
+  for(const i of arr){c+=(i[key]||0);if(r<=c)return i;}
+  return arr[arr.length-1];
+}
+
+function getQKey(){
+  const e=Object.entries(QUALITY_CFG);
+  return wPick(e.map(([k,v])=>({k,p:v.p})),'p').k;
+}
+
+function getRankStr(lv){
+  if(lv<=10)return`魂士·${lv}级`;
+  if(lv<=20)return`魂师·${lv}级`;
+  if(lv<=30)return`大魂师·${lv}级`;
+  if(lv<=40)return`魂尊·${lv}级`;
+  if(lv<=50)return`魂宗·${lv}级`;
+  if(lv<=60)return`魂王·${lv}级`;
+  if(lv<=70)return`魂帝·${lv}级`;
+  if(lv<=80)return`魂圣·${lv}级`;
+  if(lv<=90)return`魂斗罗·${lv}级`;
+  if(lv<=94)return`封号斗罗·${lv}级`;
+  if(lv<=98)return`超级斗罗·${lv}级`;
+  if(lv===99)return`极限斗罗·99级`;
+  if(lv<=109)return`神级·${lv}级`;
+  if(lv<=119)return`真神级·${lv}级`;
+  return`超神级·${lv}级`;
+}
+
+function expForLevel(lv){return lv*lv*50+lv*100;}
+
+function addSP(amt,label){
+  G.sp+=amt;G.dailyEarned+=amt;
+  updateHUD();
+  if(label)notify(`+${amt} 魂力${label?` (${label})`:''}`,'normal');
+}
+
+function addExp(amt){
+  G.exp+=amt;
+  while(G.exp>=expForLevel(G.level)){
+    G.exp-=expForLevel(G.level);
+    G.level++;
+    notify(`🎉 升级！当前: ${getRankStr(G.level)}`,'legend');
+    spawnBurst('#ffd700',60);
+  }
+  updateHUD();
+  updateExpBar();
+}
+
+function updateHUD(){
+  document.getElementById('hud-lv').textContent=`Lv.${G.level}`;
+  document.getElementById('hud-soul').textContent=G.sp;
+}
+
+function updateExpBar(){
+  const need=expForLevel(G.level);
+  const pct=Math.min(100,(G.exp/need)*100);
+  const fill=document.getElementById('exp-fill');
+  const lbl=document.getElementById('exp-label');
+  if(fill)fill.style.width=pct+'%';
+  if(lbl)lbl.textContent=`${G.exp} / ${need} EXP`;
+}
+
+// ══════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ══════════════════════════════════════════════════
+function notify(msg,type='normal'){
+  const area=document.getElementById('notif');
+  const el=document.createElement('div');
+  el.className='ntf '+(type||'normal');
+  el.textContent=msg;
+  area.appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function navTo(page,navEl){
+  // Hide fusion sub-page
+  document.getElementById('page-fusion').style.display='none';
+  document.getElementById('page-fusion').classList.remove('active');
+
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+page);
+  if(pg){pg.classList.add('active');}
+  if(navEl)navEl.classList.add('active');
+
+  if(page==='soul')renderSoulPage();
+  if(page==='hunt')renderRecentRings();
+  if(page==='lottery'){renderLotPage();}
+  if(page==='tasks'){renderTasks();updateTaskCounters();}
+  if(page==='bag')renderBag();
+}
+
+// ══════════════════════════════════════════════════
+//  AWAKENING
+// ══════════════════════════════════════════════════
+function triggerAwaken(){
+  const circle=document.getElementById('aw-altar');
+  circle.style.transform='scale(0.95)';
+  setTimeout(()=>{circle.style.transform='';},200);
+
+  // Roll quality
+  const qk=getQKey();
+  const pool=SOUL_DB[qk]||SOUL_DB.common;
+  const sd=pick(pool);
+  const qc=QUALITY_CFG[qk];
+
+  let attrs=[...(sd.a||[])];
+  // Mutation 5%
+  if(Math.random()<0.05){
+    const mx=["混沌","神秘","极致","变异","觉醒","逆天"];
+    attrs.push(pick(mx)+'·'+attrs[0]);
+    notify('⚡ 属性变异触发！','epic');
+  }
+
+  const initPow=Math.min(10,(sd.p||1));
+  G.soul={
+    id:Date.now(),name:sd.n,icon:sd.i,quality:qk,
+    desc:sd.d,attrs,initPow,
+    rings:[],skills:genSkills(sd,qk),
+    secondAwakened:false,divine:false,
+  };
+  G.awakenDone=true;
+  G.stats.awakens++;
+  G.level=Math.max(G.level,initPow);
+  addExp(initPow*50);
+  updateHUD();
+
+  // Show result overlay
+  showResult(G.soul,qk,qc);
+}
+
+function showResult(soul,qk,qc){
+  document.getElementById('or-burst').style.setProperty('--bc',qc.bc);
+  document.getElementById('or-icon').textContent=soul.icon;
+  document.getElementById('or-q').textContent=qc.n+' 品质';
+  document.getElementById('or-q').style.color=qc.c;
+  document.getElementById('or-name').textContent=soul.name;
+  document.getElementById('or-name').style.color=qc.c;
+  document.getElementById('or-desc').textContent=soul.desc;
+  document.getElementById('or-pow').textContent=soul.initPow;
+  document.getElementById('or-attr').textContent=soul.attrs.slice(0,2).join('·');
+  document.getElementById('or-q2').textContent=qc.n;
+  document.getElementById('ov-result').classList.add('show');
+  spawnBurst(qc.bc.replace(/[^#\d,\. ]/g,'').trim()||'#c9a227',100);
+
+  if(['legend','apex','hc','ha','twin','triple'].includes(qk)){
+    const msgs={legend:'🌟 传说武魂！万中无一！',apex:'🔥 顶级武魂！震撼世界！',hc:'🟢 隐藏武魂觉醒！',ha:'💗 顶级隐藏！天命之才！',twin:'✨ 双生武魂！旷世奇才！',triple:'🌈 三生武魂！天命之子！'};
+    setTimeout(()=>notify(msgs[qk]||'武魂觉醒！',qk==='legend'?'legend':'divine'),300);
+  }
+}
+
+function closeResult(){
+  document.getElementById('ov-result').classList.remove('show');
+  document.getElementById('screen-awaken').style.display='none';
+  renderSoulPage();
+}
+
+// ══════════════════════════════════════════════════
+//  SOUL PAGE
+// ══════════════════════════════════════════════════
+function renderSoulPage(){
+  const p=document.getElementById('page-soul');
+  if(!G.awakenDone||!G.soul){
+    p.innerHTML='<div class="empty-state"><div class="ei">🌀</div><div class="em">尚未觉醒武魂</div></div>';
+    return;
+  }
+  const s=G.soul;
+  const qc=QUALITY_CFG[s.quality]||QUALITY_CFG.common;
+  const need=expForLevel(G.level);
+  const expPct=Math.min(100,(G.exp/need)*100);
+  const totalPow=calcTotalPower();
+
+  // Equipped artifact html
+  let artHtml='';
+  if(G.equippedArt){
+    const a=G.equippedArt;
+    artHtml=`<div class="card">
+      <div class="st" style="margin-bottom:10px">⚔️ 装备神器</div>
+      <div class="art-slot">
+        <div class="art-icon">${a.i}</div>
+        <div class="art-info">
+          <div class="art-name">${a.n}</div>
+          <div class="art-desc">${a.d}</div>
+          <div class="art-power">战力 +${a.power}</div>
+        </div>
+        <div class="art-btn remove" onclick="unequipArt()">卸下</div>
+      </div>
+    </div>`;
+  } else {
+    // Show equippable artifacts from bag
+    const arts=G.bag.filter(i=>i.type==='artifact');
+    if(arts.length>0){
+      artHtml=`<div class="card">
+        <div class="st" style="margin-bottom:10px">⚔️ 神器系统</div>
+        ${arts.slice(0,3).map(a=>`<div class="art-slot">
+          <div class="art-icon">${a.data.i}</div>
+          <div class="art-info">
+            <div class="art-name">${a.data.n}</div>
+            <div class="art-desc">${a.data.d}</div>
+            <div class="art-power">战力 +${a.data.power}</div>
+          </div>
+          <div class="art-btn" onclick="equipArt('${a.data.id}')">穿戴</div>
+        </div>`).join('')}
+      </div>`;
+    } else {
+      artHtml=`<div class="card"><div class="st" style="margin-bottom:8px">⚔️ 神器系统</div><div style="font-size:12px;color:var(--dim);padding:8px 0">暂无神器，可通过狩猎或星运获取。</div></div>`;
+    }
+  }
+
+  // Ring dots
+  const ringDots=Array(10).fill(0).map((_,i)=>{
+    const r=s.rings[i];
+    return r?`<div class="rdot" style="background:${r.c};box-shadow:0 0 4px ${r.c}50" title="${r.n}"></div>`
+            :`<div class="rdot empty"></div>`;
+  }).join('');
+
+  // Skills html
+  const skillsHtml=(s.skills||[]).map(sk=>`
+    <div class="skill-item">
+      <div class="skill-name">${sk.name}</div>
+      <div class="skill-desc">${sk.desc}</div>
+      <div class="skill-params">
+        ${sk.params.map(pr=>`<span class="skill-param">${pr}</span>`).join('')}
+      </div>
+    </div>`).join('');
+
+  // Titles
+  const titlesHtml=G.titles.length>0
+    ? G.titles.map(t=>`<span class="title-badge" style="color:${t.c||'var(--gold-l)'};border-color:${(t.c||'#c9a227')}40">${t.n}</span>`).join('')
+    : '<span style="font-size:12px;color:var(--dim)">暂无称号</span>';
+
+  // Paths
+  const hasPath=s.rings.length>=9;
+  const pathHtml=hasPath?`<div class="card">
+    <div class="st" style="margin-bottom:10px">🌌 特殊道路</div>
+    <div class="path-grid">
+      ${[{n:"成神之路",i:"🌟",d:"突破极限，踏上成神旅途。",r:"9环以上"},
+         {n:"混沌之路",i:"🌀",d:"混沌力量觉醒，游走规则之外。",r:"混沌属性"},
+         {n:"隐藏之路",i:"🔮",d:"隐藏武魂持有者独有之路。",r:"隐藏武魂"},
+         {n:"神之上",i:"👁️",d:"超越神级，窥探更高存在。",r:"神级武魂"},
+         {n:"位面规则",i:"⚖️",d:"掌控位面规则，成为位面之主。",r:"规则系"},
+         {n:"你",i:"∞",d:"超越一切，成为宇宙本身。",r:"宇宙之核"},
+      ].map(pt=>`<div class="pcard">
+        <div class="pc-ico">${pt.i}</div>
+        <div class="pc-name">${pt.n}</div>
+        <div class="pc-desc">${pt.d}</div>
+        <div class="pc-req">需要: ${pt.r}</div>
+      </div>`).join('')}
+    </div>
+  </div>`:'';
+
+  p.innerHTML=`
+    <div class="soul-hero">
+      <div class="sh-top">
+        <div class="sh-icon">${s.icon}</div>
+        <div class="sh-info">
+          <div class="sh-name" style="color:${qc.c}">${s.name}${s.divine?' 🌟':''}</div>
+          <div class="sh-titles">${titlesHtml}</div>
+          <div class="sh-rank">${getRankStr(G.level)} · ${qc.n}品质${s.secondAwakened?' · 二次觉醒':''}</div>
+          <div class="sh-exp">
+            <div class="sh-exp-row"><span class="sh-exp-lbl">修炼经验</span><span class="sh-exp-val">${G.exp} / ${need} EXP (${expPct.toFixed(1)}%)</span></div>
+            <div class="exp-b"><div class="exp-bf" style="width:${expPct}%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sh-btns">
+        <div class="sh-btn primary" onclick="doSecondAwaken()">⚡ 二次觉醒</div>
+        <div class="sh-btn purple" onclick="openSoulDetail()">📖 武魂详情</div>
+        <div class="sh-btn equip" onclick="openAssignRing()">💍 装配魂环</div>
+        <div class="sh-btn reset" onclick="confirmReset()">🔄 重新开始</div>
+      </div>
+    </div>
+
+    <div class="stats-g">
+      <div class="sbox"><div class="sv">${totalPow.toLocaleString()}</div><div class="sl">总战力</div></div>
+      <div class="sbox"><div class="sv">${s.rings.length}/10</div><div class="sl">魂环</div></div>
+      <div class="sbox"><div class="sv">${G.stats.rings}</div><div class="sl">获取魂环</div></div>
+      <div class="sbox"><div class="sv">${G.bones.length}</div><div class="sl">魂骨</div></div>
+      <div class="sbox"><div class="sv">${G.titles.length}</div><div class="sl">称号</div></div>
+      <div class="sbox"><div class="sv">${G.huntCount}</div><div class="sl">狩猎次数</div></div>
+    </div>
+
+    <div class="card">
+      <div class="st" style="margin-bottom:8px">魂环</div>
+      <div class="ring-row">${ringDots}</div>
+    </div>
+
+    <div class="card">
+      <div class="st" style="margin-bottom:10px">魂技</div>
+      ${skillsHtml||'<div style="font-size:12px;color:var(--dim)">暂无魂技</div>'}
+    </div>
+
+    ${artHtml}
+
+    ${pathHtml}
+  `;
+}
+
+function calcTotalPower(){
+  let p=G.level*120;
+  if(G.soul){
+    const q=QUALITY_CFG[G.soul.quality];
+    p+=(q?q.p:1)*60;
+    (G.soul.rings||[]).forEach(r=>p+=Math.log10((r.y||100)+1)*90);
+  }
+  G.bones.forEach(b=>p+=(b.yearPow||100));
+  if(G.equippedArt)p+=G.equippedArt.power;
+  return Math.floor(p);
+}
+
+function openSoulDetail(){
+  if(!G.soul)return;
+  const s=G.soul;
+  const qc=QUALITY_CFG[s.quality]||QUALITY_CFG.common;
+  const skillsHtml=(s.skills||[]).map(sk=>`
+    <div class="skill-item">
+      <div class="skill-name">${sk.name}</div>
+      <div class="skill-desc">${sk.desc}</div>
+      <div class="skill-params">${sk.params.map(pr=>`<span class="skill-param">${pr}</span>`).join('')}</div>
+    </div>`).join('');
+
+  document.getElementById('modal-body').innerHTML=`
+    <div class="m-title" style="color:${qc.c}">${s.icon} ${s.name}</div>
+    <div class="m-sub" style="color:${qc.c}">${qc.n} 品质 ${s.divine?'· 神级':''}</div>
+    <div style="font-size:12px;color:var(--dim);text-align:center;margin-bottom:12px;line-height:1.7">${s.desc}</div>
+    <div class="m-sec">
+      <div class="m-sec-title">属性参数</div>
+      <div class="m-attr-grid">
+        <div class="m-attr"><div class="m-attr-n">初始魂力</div><div class="m-attr-v">${s.initPow}</div></div>
+        <div class="m-attr"><div class="m-attr-n">品质评级</div><div class="m-attr-v" style="color:${qc.c};font-size:12px">${qc.n}</div></div>
+        ${s.attrs.map(a=>`<div class="m-attr"><div class="m-attr-n">属性</div><div class="m-attr-v" style="font-size:12px">${a}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="m-sec">
+      <div class="m-sec-title">魂技 (${s.skills?.length||0})</div>
+      ${skillsHtml||'<div style="font-size:12px;color:var(--dim)">暂无魂技</div>'}
+    </div>
+  `;
+  document.getElementById('modal').classList.add('show');
+}
+
+function doSecondAwaken(){
+  if(!G.soul){notify('请先觉醒武魂','normal');return;}
+  if(G.soul.divine){notify('该武魂已为神级','normal');return;}
+  const cost=500;
+  if(G.sp<cost){notify(`魂力不足！需要${cost}魂力`,'normal');return;}
+  G.sp-=cost;
+
+  if(Math.random()<0.2){
+    G.soul.divine=true;
+    G.soul.quality='apex';
+    G.soul.attrs.push('神级','超越');
+    notify(`🌟 ${G.soul.name} 晋升神级武魂！`,'divine');
+    spawnBurst('#ffd700',120);
+  } else {
+    if(Math.random()<0.25){
+      G.soul.attrs.push('暴击·'+pick(G.soul.attrs||['力量']));
+      notify(`⚡ ${G.soul.name} 属性暴击！`,'epic');
+    }
+    const order=['common','rare','epic','legend','apex'];
+    const idx=order.indexOf(G.soul.quality);
+    if(idx<order.length-1&&Math.random()<0.4){
+      G.soul.quality=order[idx+1];
+      notify(`✨ ${G.soul.name} 品质提升为 ${QUALITY_CFG[G.soul.quality].n}！`,'legend');
+    } else {
+      notify(`${G.soul.name} 二次觉醒完成`,'normal');
+    }
+    G.soul.secondAwakened=true;
+  }
+  addExp(200);
+  updateHUD();saveState();renderSoulPage();
+}
+
+function equipArt(id){
+  const item=G.bag.find(i=>i.type==='artifact'&&i.data.id===id);
+  if(!item)return;
+  if(G.equippedArt)G.bag.push({type:'artifact',data:G.equippedArt,count:1,id:Date.now()});
+  G.equippedArt=item.data;
+  G.bag=G.bag.filter(i=>!(i.type==='artifact'&&i.data.id===id));
+  notify(`⚔️ ${item.data.n} 已装备！战力 +${item.data.power}`,'legend');
+  saveState();renderSoulPage();
+}
+function unequipArt(){
+  if(!G.equippedArt)return;
+  G.bag.push({type:'artifact',data:G.equippedArt,count:1,id:Date.now()});
+  notify(`${G.equippedArt.n} 已卸下`,'normal');
+  G.equippedArt=null;
+  saveState();renderSoulPage();
+}
+
+function confirmReset(){
+  if(confirm('确认重新开始？所有数据将清零，此操作不可撤销！')){
+    if(confirm('再次确认：清除所有进度？')){
+      localStorage.removeItem('douluo_v2');
+      G=defaultState();
+      document.getElementById('screen-awaken').style.display='flex';
+      updateHUD();updateExpBar();
+      notify('游戏已重置，一切归零。','normal');
+    }
+  }
+}
+
+function openAssignRing(){
+  const rings=G.bag.filter(i=>i.type==='ring');
+  if(!G.soul){notify('请先觉醒武魂','normal');return;}
+  if(G.soul.rings.length>=10){notify('武魂已满10环！','normal');return;}
+  if(!rings.length){notify('背包中无可用魂环，请先狩猎！','normal');return;}
+  // show ring select modal
+  document.getElementById('ring-sel-list').innerHTML=rings.map(r=>`
+    <div class="ring-item" onclick="assignRing('${r.data.id||r.id}')">
+      <div class="ring-orb" style="background:${r.data.c}">${r.data.n[0]}</div>
+      <div class="ring-info">
+        <div class="ring-yr" style="color:${r.data.c}">${r.data.n}</div>
+        <div class="ring-sk">${r.data.skill}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('ring-sel-modal').style.display='flex';
+}
+
+function assignRing(rid){
+  const item=G.bag.find(i=>i.type==='ring'&&(i.data.id==rid||i.id==rid));
+  if(!item||!G.soul)return;
+  if(G.soul.rings.length>=10){notify('已达10环上限','normal');return;}
+  G.soul.rings.push({...item.data,id:Date.now()});
+
+  // Generate skill from ring
+  const rt=RING_TIERS.find(t=>t.n===item.data.n)||RING_TIERS[0];
+  const sk=pick(rt.skills||["力量增幅"]);
+  const mutate=Math.random()<0.01;
+  G.soul.skills.push({
+    name:sk+(mutate?'·质变':''),
+    desc:`由${item.data.n}魂环赋予。${mutate?'【质变：效果提升500%！】':''}威力随修炼提升。`,
+    params:[`来源: ${item.data.n}`,`环号: 第${G.soul.rings.length}环`,...(mutate?['质变觉醒✨']:[])]
+  });
+  if(mutate)notify('✨ 魂技质变！','legend');
+
+  // Remove from bag
+  item.count--;
+  if(item.count<=0)G.bag=G.bag.filter(i=>!(i.type==='ring'&&(i.data.id==rid||i.id==rid)));
+
+  if(G.soul.rings.length>=9&&!G.pathsOpen.includes('path')){
+    G.pathsOpen.push('path');
+    notify('🌌 叠加9环！特殊道路解锁！','divine');
+  }
+  G.stats.rings++;
+  addExp(50);
+  closeRingSel();
+  saveState();renderSoulPage();
+  notify(`✅ ${item.data.n} 魂环已装配`,'normal');
+}
+
+function closeRingSel(){
+  document.getElementById('ring-sel-modal').style.display='none';
+}
+
+// ══════════════════════════════════════════════════
+//  SKILL GENERATION
+// ══════════════════════════════════════════════════
+function genSkills(sd,qk){
+  const baseMap={
+    common:[{n:"体质强化",d:"修炼基础，提升躯体素质与耐久能力。",p:["攻击+2","防御+2","体质+3"]},
+            {n:"感知提升",d:"感知能力增强，扩展战场感知范围。",p:["感知范围+5m","预判+5%"]}],
+    rare:[{n:"属性共鸣",d:"与武魂属性产生共鸣，属性伤害大幅提升。",p:["属性伤害+20%","共鸣时长5秒"]},
+          {n:"战斗直觉",d:"战斗本能觉醒，反应速度与判断力大幅提升。",p:["反应速度+30%","暴击率+5%"]}],
+    epic:[{n:"领域感知",d:"感知领域边缘，获取领域初期能力，可压制弱者。",p:["领域范围10m","压制效果20%","持续8秒"]},
+          {n:"属性质变",d:"属性发生质的变化，威力突破常规上限。",p:["属性伤害×2","穿透率+15%"]}],
+    legend:[{n:"领域半开",d:"领域半开展，范围内产生显著特殊效果。",p:["领域范围25m","速度-30%(敌)","持续15秒"]},
+            {n:"神力涌现",d:"神力开始涌现，力量超越人类极限边界。",p:["全属性+50%","神力覆盖率30%"]}],
+    apex:[{n:"领域全开",d:"领域完全展开，范围内敌人受到强力压制。",p:["领域范围50m","全属性-50%(敌)","持续30秒"]},
+          {n:"神通降临",d:"神通降临人间，战力倍增进入无上境界。",p:["战力×3","神通时长20秒","冷却60秒"]}],
+    hc:[{n:"隐匿天赋",d:"隐藏武魂的特殊天赋觉醒，秘密加持。",p:["隐身效果+40%","暗属性伤害+60%"]},
+        {n:"秘境共鸣",d:"与神秘境界产生共鸣，获得神秘加持。",p:["特殊感知+100m","概率触发秘境"]}],
+    ha:[{n:"绝世之力",d:"绝世之力爆发，凌驾一切之上无可匹敌。",p:["伤害×5","无视防御20%","持续10秒"]},
+        {n:"规则触碰",d:"开始触碰世界规则的边缘，获得规则之力。",p:["规则之力+1层","时空感知+200%"]}],
+    twin:[{n:"双生共鸣",d:"双生武魂产生共鸣，两种力量互相增幅。",p:["双重伤害+100%","共鸣爆发概率15%"]},
+          {n:"双重领域",d:"两种领域同时展开，效果叠加无法抵挡。",p:["双领域范围60m","叠加压制效果"]}],
+    triple:[{n:"三生轮回",d:"三生武魂轮回之力觉醒，力量循环不息。",p:["轮回伤害+200%","生命恢复+50%/秒"]},
+            {n:"万法归一",d:"三种力量归于一体，演化出超越一切的终极之力。",p:["全属性×10","无敌时长5秒","冷却120秒"]}],
+  };
+  const skillSet=baseMap[qk]||baseMap.common;
+  const attrSkill={n:`${(sd.a||['未知'])[0]}精通`,d:`对${(sd.a||['未知'])[0]}属性拥有天生精通，效果倍增。`,p:[`${(sd.a||['未知'])[0]}伤害+35%`,`${(sd.a||['未知'])[0]}感知+50%`]};
+  return [...skillSet,attrSkill].map(sk=>{
+    const mutate=Math.random()<0.005;
+    return{name:sk.n+(mutate?'·质变':''),desc:sk.d+(mutate?' 【质变：效果额外+300%！】':''),params:sk.p};
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  HUNT
+// ══════════════════════════════════════════════════
+function hunt(zone){
+  const costs={forest:100,chaos:500,primordial:1000,random:300};
+  const cost=costs[zone];
+  if(G.sp<cost){notify(`魂力不足！需要${cost}魂力`,'normal');return;}
+  G.sp-=cost;G.huntCount++;G.stats.hunts++;
+  progressTask('hunt');
+
+  let ring=null;
+  switch(zone){
+    case'forest': ring=rollRing([40,30,15,9,3,1,0.4,0]);break;
+    case'chaos':  ring=rollRing([0,10,25,30,20,12,2,0]);break;
+    case'primordial':ring=rollRing([0,0,5,15,30,30,15,0.0000000001]);break;
+    case'random': {
+      const rnd=Math.random();
+      if(rnd<0.3)ring=rollRing([40,30,15,9,3,1,0.4,0]);
+      else if(rnd<0.6)ring=rollRing([0,10,25,30,20,12,2,0]);
+      else if(rnd<0.85)ring=rollRing([0,0,5,15,30,30,15,0.0000000001]);
+      else{notify('🌪️ 传送失败！迷失在虚空中，损失200魂力','normal');G.sp-=200;updateHUD();saveState();return;}
+    }break;
+  }
+
+  if(!ring)return;
+  const tier=RING_TIERS.find(t=>t.n===ring.n)||RING_TIERS[0];
+  const skill=pick(tier.skills);
+  const ringObj={id:Date.now(),n:ring.n,y:ring.y,c:ring.c,skill,tier:ring.n};
+
+  // Cosmic unique check
+  if(ring.unique&&G.cosmicOwned){
+    notify('宇宙之核已被持有，本次改为神赐魂环','normal');
+    const alt=RING_TIERS[6];
+    ringObj.n=alt.n;ringObj.y=alt.y;ringObj.c=alt.c;ringObj.tier=alt.n;
+  }
+  if(ring.unique&&!G.cosmicOwned){
+    G.cosmicOwned=true;
+    notify('🌌 ！！！宇宙之核降临！亘古唯一！！！','cosmic');
+    spawnBurst('#00ffff',200);
+  }
+
+  // Bone drop
+  let bone=null;
+  if(Math.random()<0.25){
+    const bt=pick(BONE_TYPES);
+    const yearPow=Math.floor(Math.log10(ring.y+1)*80);
+    bone={...bt,yearPow,ringYear:ring.n,id:Date.now()+1};
+    G.stats.bones++;
+    notify(`🦴 掉落魂骨：${bt.n} (${ring.n}品质)`,'epic');
+  }
+
+  // Herb drop (15% for forest, 20% for chaos, 25% for primordial, 10% for random)
+  const herbChance={forest:0.15,chaos:0.20,primordial:0.25,random:0.10}[zone]||0.1;
+  if(Math.random()<herbChance){
+    const zoneHerbs={forest:[0,1,4],chaos:[1,2,3,4],primordial:[3,4,5,6],random:[0,1,2,3,4,5,6]}[zone];
+    const herb=HERBS[pick(zoneHerbs||[0,1])];
+    G.bag.push({type:'herb',data:herb,count:1,id:Date.now()+2});
+    notify(`🌿 发现药草：${herb.n}！`,'epic');
+  }
+
+  // Title drop (1%)
+  if(Math.random()<0.01){
+    const titlePool={forest:TITLE_DB.hunt,chaos:TITLE_DB.hunt,primordial:TITLE_DB.hunt,random:TITLE_DB.hunt}[zone]||TITLE_DB.hunt;
+    const t=pick(titlePool);
+    if(!G.titles.find(x=>x.n===t.n)){
+      G.titles.push(t);
+      notify(`👑 获得称号：${t.n}！`,'divine');
+    }
+  }
+
+  G.bag.push({type:'ring',data:ringObj,count:1,id:Date.now()+3});
+  if(bone)G.bag.push({type:'bone',data:bone,count:1,id:Date.now()+4});
+
+  G.recentRings.unshift(ringObj);
+  if(G.recentRings.length>15)G.recentRings.pop();
+
+  // 5x event
+  if(Math.random()<0.02){
+    const b=cost*5;addSP(b,'5倍魂力奇遇');
+    notify(`🌟 特殊事件！5倍魂力 +${b}！`,'legend');
+  }
+
+  addExp(30);
+  updateHUD();saveState();renderRecentRings();renderBag();
+  document.getElementById('hunt-cnt').textContent=G.huntCount;
+  notify(`🔮 获得 ${ring.n} 魂环·${skill}`,ring.unique?'cosmic':ring.special?'divine':ring.y>=999999999?'legend':'normal');
+}
+
+function rollRing(weights){
+  const tot=weights.reduce((s,w)=>s+w,0);
+  let r=Math.random()*tot,c=0;
+  for(let i=0;i<RING_TIERS.length;i++){c+=weights[i];if(r<=c)return RING_TIERS[i];}
+  return RING_TIERS[0];
+}
+
+function renderRecentRings(){
+  const c=document.getElementById('recent-rings');
+  if(!c)return;
+  if(!G.recentRings.length){c.innerHTML='<div class="empty-state"><div class="ei">💫</div><div class="em">尚未狩猎</div></div>';return;}
+  c.innerHTML=G.recentRings.slice(0,8).map(r=>`
+    <div class="ring-item">
+      <div class="ring-orb" style="background:${r.c}">${r.n[0]}</div>
+      <div class="ring-info"><div class="ring-yr" style="color:${r.c}">${r.n}</div><div class="ring-sk">${r.skill}</div></div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  LOTTERY (星运)
+// ══════════════════════════════════════════════════
+const LOT_CFG=[
+  {name:"普通奖池",sub:"基础奖励",banner:"linear-gradient(135deg,rgba(156,163,175,.18),rgba(59,130,246,.1))",cost:100,
+   pool:[
+     {w:28,fn:()=>({t:'sp',v:50,l:"50魂力"})},
+     {w:22,fn:()=>({t:'sp',v:100,l:"100魂力"})},
+     {w:18,fn:()=>({t:'ring',ti:1,l:"千年魂环"})},
+     {w:10,fn:()=>({t:'bone',ti:1,l:"千年魂骨"})},
+     {w:7,fn:()=>({t:'ring',ti:2,l:"万年魂环"})},
+     {w:5,fn:(ten)=>({t:'ring',ti:3,l:"十万年魂环"+(ten?'+魂骨':''),bone:ten}),lim:true},
+     {w:5,fn:()=>({t:'herb',l:"随机药草"})},
+     {w:2.97,fn:()=>({t:'artifact',l:"随机神器"})},
+     {w:1,fn:()=>({t:'title',pool:'rare',l:"稀有称号(紫)"})},
+     {w:0.03,fn:()=>({t:'title',pool:'special',l:"欧皇称号"})},
+   ],
+   detail:[
+     {n:"50魂力",p:"28%"},{n:"100魂力",p:"22%"},{n:"千年魂环",p:"18%",lim:true},
+     {n:"千年魂骨",p:"10%"},{n:"万年魂环",p:"7%"},{n:"十万年魂环",p:"5%",lim:true},
+     {n:"随机药草",p:"5% (限时×2)"},{n:"随机神器",p:"2.97%"},{n:"稀有称号(紫)",p:"1%"},{n:"欧皇称号",p:"0.03%"},
+   ]},
+  {name:"高级奖池",sub:"精英奖励",banner:"linear-gradient(135deg,rgba(59,130,246,.22),rgba(139,92,246,.14))",cost:500,
+   pool:[
+     {w:22,fn:()=>({t:'sp',v:250,l:"250魂力"})},
+     {w:18,fn:()=>({t:'sp',v:500,l:"500魂力"})},
+     {w:16,fn:()=>({t:'ring',ti:2,l:"万年魂环"})},
+     {w:10,fn:()=>({t:'bone',ti:2,l:"万年魂骨"})},
+     {w:8,fn:()=>({t:'ring',ti:3,l:"十万年魂环"})},
+     {w:5,fn:()=>({t:'bone',ti:3,l:"十万年魂骨"})},
+     {w:3,fn:()=>({t:'ring',ti:4,l:"百万年魂环"})},
+     {w:5,fn:()=>({t:'herb',l:"随机药草"})},
+     {w:1,fn:()=>({t:'artifact',l:"随机神器"})},
+     {w:1,fn:()=>({t:'title',pool:'advanced',l:"高级称号(金)"})},
+     {w:0.0000001,fn:()=>({t:'title',pool:'special',l:"欧皇称号"})},
+   ],
+   detail:[
+     {n:"250魂力",p:"22%"},{n:"500魂力",p:"18%"},{n:"万年魂环",p:"16%"},{n:"万年魂骨",p:"10%"},
+     {n:"十万年魂环",p:"8%"},{n:"十万年魂骨",p:"5%"},{n:"百万年魂环",p:"3%"},
+     {n:"随机药草",p:"5% (限时×2)"},{n:"随机神器",p:"1%"},{n:"高级称号(金)",p:"1%"},{n:"欧皇称号",p:"极低"},
+   ]},
+  {name:"顶级奖池",sub:"绝世奖励",banner:"linear-gradient(135deg,rgba(245,158,11,.28),rgba(239,68,68,.18))",cost:1000,
+   pool:[
+     {w:18,fn:()=>({t:'sp',v:500,l:"500魂力"})},
+     {w:13,fn:()=>({t:'sp',v:1000,l:"1000魂力"})},
+     {w:10,fn:()=>({t:'ring',ti:3,l:"十万年魂环+魂骨",bone:true})},
+     {w:5,fn:()=>({t:'ring',ti:4,l:"百万年魂环+魂骨",bone:true})},
+     {w:2,fn:()=>({t:'artifact',self:true,l:"自选神器"})},
+     {w:1,fn:()=>({t:'ring',ti:5,l:"不可估量魂环"})},
+     {w:5,fn:()=>({t:'herb',l:"高级药草"})},
+     {w:1,fn:()=>({t:'title',pool:'legend',l:"传说称号(红)"})},
+     {w:0.1,fn:()=>({t:'title',pool:'special',l:"欧皇称号"})},
+     {w:0.001,fn:(ten)=>({t:'ring',cosmic:true,l:"宇宙之核(唯一)"+( ten?"(十连概率+)":"")})},
+   ],
+   detail:[
+     {n:"500魂力",p:"18%"},{n:"1000魂力",p:"13%"},{n:"十万年魂环+魂骨",p:"10%"},
+     {n:"百万年魂环+魂骨",p:"5%"},{n:"自选神器",p:"2%"},{n:"不可估量魂环",p:"1%"},
+     {n:"高级药草",p:"5% (限时×2)"},{n:"传说称号(红)",p:"1%"},{n:"欧皇称号",p:"0.1%"},{n:"宇宙之核(唯一)",p:"0.001%"},
+   ]},
+];
+
+function switchLot(idx,el){
+  curLotMode=idx;G.lotMode=idx;
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderLotPage();
+}
+
+function renderLotPage(){
+  const cfg=LOT_CFG[curLotMode];
+  document.getElementById('lb-title').textContent=cfg.name;
+  document.getElementById('lb-sub').textContent=cfg.sub;
+  document.getElementById('l-banner').style.background=cfg.banner;
+  document.getElementById('lc1').textContent=`×${cfg.cost} 魂力`;
+  document.getElementById('lc5').textContent=`×${cfg.cost*5} 魂力`;
+  document.getElementById('lc10').textContent=`×${cfg.cost*10} 魂力`;
+  document.getElementById('pool-detail').innerHTML=cfg.detail.map(d=>`
+    <div class="pool-item">
+      <span class="pi-name">${d.n}</span>
+      <span>${d.lim?`<span class="pi-limited">限时</span> `:''}<span class="pi-prob">${d.p}</span></span>
+    </div>`).join('');
+  renderLotHistory();
+}
+
+function doLot(times){
+  const cfg=LOT_CFG[curLotMode];
+  const total=cfg.cost*times;
+  if(G.sp<total){notify(`魂力不足！需要${total}魂力`,'normal');return;}
+  G.sp-=total;
+  G.lotTotal+=times;
+  const isTen=times>=10;
+  const results=[];
+  for(let i=0;i<times;i++){
+    const r=rollLot(cfg,isTen);
+    results.push(r);
+    applyLot(r,isTen);
+  }
+  G.lotHistory.unshift({time:Date.now(),summary:results.map(r=>r.l).join(' · '),count:times});
+  if(G.lotHistory.length>15)G.lotHistory.pop();
+  document.getElementById('lot-total').textContent=G.lotTotal;
+  G.luckBonus=0;
+  updateHUD();saveState();renderLotHistory();renderBag();
+}
+
+function rollLot(cfg,isTen){
+  if(G.ouhuang){G.ouhuang=false;notify('👑 欧皇称号激活！必中顶级！','divine');return cfg.pool[cfg.pool.length-3].fn(isTen);}
+  // Luck bonus: reduces lower weight
+  const pool=cfg.pool.map((p,i)=>{
+    let w=p.w;
+    // limited time herb boost
+    if(p.fn(false).t==='herb')w*=2;
+    // luck bonus
+    if(G.luckBonus>0&&i<3)w=Math.max(0.1,w-G.luckBonus*0.5);
+    return{...p,_w:w};
+  });
+  const tot=pool.reduce((s,p)=>s+p._w,0);
+  let r=Math.random()*tot,c=0;
+  for(const p of pool){c+=p._w;if(r<=c)return p.fn(isTen);}
+  return pool[0].fn(isTen);
+}
+
+function applyLot(res,isTen){
+  if(res.t==='sp'){addSP(res.v,null);notify(`🎲 获得 ${res.v} 魂力`,'normal');}
+  else if(res.t==='ring'){
+    const ti=Math.min(res.ti||0,RING_TIERS.length-1);
+    const tier=res.cosmic?RING_TIERS[7]:RING_TIERS[ti];
+    const skill=pick(tier.skills);
+    const ro={id:Date.now(),n:tier.n,y:tier.y,c:tier.c,skill,tier:tier.n};
+    if(res.cosmic&&!G.cosmicOwned){G.cosmicOwned=true;notify('🌌 ！！！宇宙之核！！！','cosmic');spawnBurst('#00ffff',200);}
+    else notify(`🔮 抽到：${tier.n} 魂环·${skill}`,tier.y>=999999999?'legend':'normal');
+    G.bag.push({type:'ring',data:ro,count:1,id:Date.now()});
+    if(res.bone){const bt=pick(BONE_TYPES);const yp=Math.floor(Math.log10(tier.y+1)*80);G.bag.push({type:'bone',data:{...bt,yearPow:yp,ringYear:tier.n,id:Date.now()+1},count:1,id:Date.now()+1});}
+    G.stats.rings++;
+  }
+  else if(res.t==='bone'){
+    const ti=Math.min(res.ti||0,RING_TIERS.length-1);const tier=RING_TIERS[ti];
+    const bt=pick(BONE_TYPES);const yp=Math.floor(Math.log10(tier.y+1)*80);
+    G.bag.push({type:'bone',data:{...bt,yearPow:yp,ringYear:tier.n,id:Date.now()},count:1,id:Date.now()});
+    notify(`🦴 抽到：${tier.n} ${bt.n}`,'epic');G.stats.bones++;
+  }
+  else if(res.t==='artifact'){
+    const a=pick(ARTIFACTS);G.bag.push({type:'artifact',data:a,count:1,id:Date.now()});
+    notify(`⚔️ 获得神器：${a.n}！`,'legend');G.stats.arts++;
+  }
+  else if(res.t==='herb'){
+    // Limited time: higher chance picks
+    const topHerbs=isTen?[3,4,5,6]:[0,1,2,3,4];
+    const h=HERBS[pick(topHerbs)];
+    addHerbToBag(h);notify(`🌿 抽到药草：${h.n}！`,'epic');
+  }
+  else if(res.t==='title'){
+    const pool=TITLE_DB[res.pool]||TITLE_DB.rare;
+    const t=pick(pool);
+    if(!G.titles.find(x=>x.n===t.n)){G.titles.push(t);notify(`👑 获得称号：${t.n}！`,'divine');}
+    if(t.n==='欧皇'){G.ouhuang=true;notify('🌟 欧皇加持！下次必中顶级！','divine');}
+  }
+}
+
+function addHerbToBag(herb){
+  const exist=G.bag.find(i=>i.type==='herb'&&i.data.id===herb.id);
+  if(exist)exist.count++;
+  else G.bag.push({type:'herb',data:herb,count:1,id:Date.now()});
+}
+
+function renderLotHistory(){
+  const c=document.getElementById('lot-history');
+  if(!c)return;
+  if(!G.lotHistory.length){c.innerHTML='<div class="empty-state"><div class="ei">🎲</div><div class="em">尚未抽取</div></div>';return;}
+  c.innerHTML=G.lotHistory.slice(0,8).map(h=>`
+    <div class="card" style="padding:9px 11px;margin-bottom:7px">
+      <div style="font-size:10px;color:var(--dim);margin-bottom:3px">${h.count}连抽</div>
+      <div style="font-size:11px;color:var(--txt);line-height:1.7">${h.summary}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  TASKS
+// ══════════════════════════════════════════════════
+const TASK_TPL=[
+  {n:"日常修炼",d:"进行修炼5次",g:5,r:500,t:"cultivate",i:"🧘"},
+  {n:"魂环狩猎",d:"狩猎魂环3次",g:3,r:600,t:"hunt",i:"🔮"},
+  {n:"武魂强化",d:"装配魂环1次",g:1,r:700,t:"ring_equip",i:"💍"},
+  {n:"星运参与",d:"星运抽取2次",g:2,r:400,t:"lottery",i:"🌟"},
+  {n:"森林探索",d:"探索3次",g:3,r:800,t:"explore",i:"🌲"},
+  {n:"魂力积累",d:"获取2000魂力",g:2000,r:1200,t:"earn",i:"💫"},
+  {n:"连续修炼",d:"连续修炼8次",g:8,r:2000,t:"cultivate",i:"🔥"},
+  {n:"深度狩猎",d:"狩猎5次",g:5,r:1500,t:"hunt",i:"⚔️"},
+];
+
+function generateTasks(){
+  const shuffled=[...TASK_TPL].sort(()=>Math.random()-.5);
+  G.tasks=shuffled.slice(0,5).map(t=>({...t,prog:0,claimed:false,id:Date.now()+Math.random()}));
+  G.taskRT=Date.now();saveState();
+}
+
+function refreshTasks(){generateTasks();renderTasks();notify('任务已刷新','normal');}
+
+function renderTasks(){
+  if(!G.tasks.length)generateTasks();
+  const c=document.getElementById('daily-tasks');
+  if(!c)return;
+  c.innerHTML=G.tasks.map(t=>{
+    const pct=Math.min(100,(t.prog/t.g)*100);
+    const done=t.prog>=t.g;
+    return`<div class="task-item">
+      <div class="task-ico">${t.i}</div>
+      <div class="task-body">
+        <div class="task-name">${t.n}</div>
+        <div class="task-prog">${t.d} (${Math.min(t.prog,t.g)}/${t.g})</div>
+        <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+      </div>
+      <div style="text-align:right">
+        <div class="task-rew">+${t.r}</div>
+        <div class="task-claim ${t.claimed?'claimed':done?'':'claimed'}" onclick="claimTask('${t.id}')">${t.claimed?'已领取':done?'领取':'进行中'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('daily-earned').textContent=G.dailyEarned;
+}
+
+function claimTask(id){
+  const t=G.tasks.find(x=>x.id==id);
+  if(!t||t.claimed||t.prog<t.g)return;
+  t.claimed=true;addSP(t.r,`任务:${t.n}`);
+  addExp(t.r/10);
+  notify(`✅ 任务完成！+${t.r} 魂力`,'epic');
+  renderTasks();saveState();
+}
+
+function progressTask(type,amt=1){
+  if(!G.tasks.length)return;
+  G.tasks.filter(t=>t.t===type&&!t.claimed).forEach(t=>t.prog=Math.min(t.g,t.prog+amt));
+  const c=document.getElementById('daily-tasks');if(c)renderTasks();
+}
+
+function updateTaskCounters(){
+  const cc=document.getElementById('cult-cnt');
+  const ec=document.getElementById('expl-cnt');
+  if(cc)cc.textContent=`今日: ${G.cultCount}/10`;
+  if(ec)ec.textContent=`今日: ${G.explCount}/10`;
+  const cb=document.getElementById('btn-cultivate');
+  const eb=document.getElementById('btn-explore');
+  if(cb){if(G.cultCount>=10)cb.classList.add('disabled');else cb.classList.remove('disabled');}
+  if(eb){if(G.explCount>=10)eb.classList.add('disabled');else eb.classList.remove('disabled');}
+
+  const idle=document.getElementById('idle-txt');
+  const ibar=document.getElementById('idle-bar');
+  if(idle)idle.textContent=`${G.idleEarned} / 1000`;
+  if(ibar)ibar.style.width=Math.min(100,(G.idleEarned/1000)*100)+'%';
+
+  const expl=document.getElementById('explore-txt');
+  const ebar=document.getElementById('explore-bar');
+  if(expl)expl.textContent=`${G.explEarned} / 5000`;
+  if(ebar)ebar.style.width=Math.min(100,(G.explEarned/5000)*100)+'%';
+}
+
+function cultivate(){
+  if(G.cultCount>=10){notify('今日修炼已达上限(10次)','normal');return;}
+  G.cultCount++;
+  const gain=200;
+  if(G.idleEarned<1000){const actual=Math.min(gain,1000-G.idleEarned);G.idleEarned+=actual;addSP(actual,'修炼');}
+  else{notify('今日挂机魂力已满','normal');}
+  addExp(40);
+  progressTask('cultivate');progressTask('earn',200);
+  if(Math.random()<0.02){addSP(1000,'5倍修炼奇遇');notify('✨ 修炼奇遇！5倍魂力！','legend');}
+  if(Math.random()<0.05){unlockHiddenTask();}
+  updateTaskCounters();saveState();
+}
+
+function explore(){
+  if(G.explCount>=10){notify('今日探索已达上限(10次)','normal');return;}
+  G.explCount++;
+  const gain=500;
+  if(G.explEarned<5000){const actual=Math.min(gain,5000-G.explEarned);G.explEarned+=actual;addSP(actual,'探索森林');}
+  else{notify('今日探索魂力已满','normal');}
+  addExp(80);
+  progressTask('explore');progressTask('earn',500);
+  if(Math.random()<0.12){
+    const evts=['发现百年灵草！额外+200魂力','遭遇稀有魂兽！+300魂力','发现神秘遗迹！+500魂力'];
+    const e=pick(evts);const b=parseInt(e.match(/\d+/)?.[0]||'100');addSP(b,null);notify(`🌲 ${e}`,'epic');
+  }
+  if(Math.random()<0.08){
+    const h=pick(HERBS);addHerbToBag(h);notify(`🌿 森林探索发现药草：${h.n}！`,'epic');
+  }
+  updateTaskCounters();saveState();
+}
+
+function unlockHiddenTask(){
+  const htasks=[
+    {n:"秘境挑战",d:"在神秘副本中生存",r:5000,i:"🎯"},
+    {n:"混沌试炼",d:"进入混沌之地狩猎",r:3000,i:"🌀"},
+    {n:"神级追溯",d:"完成神级武魂二次觉醒",r:8000,i:"👑"},
+    {n:"古器发掘",d:"在狩猎中获取神器",r:4000,i:"⚔️"},
+  ];
+  const t=pick(htasks);
+  const c=document.getElementById('hidden-tasks');
+  if(c)c.innerHTML=`<div class="task-item">
+    <div class="task-ico">${t.i}</div>
+    <div class="task-body"><div class="task-name">${t.n}</div><div class="task-prog">${t.d}</div></div>
+    <div><div class="task-rew">+${t.r}</div><div class="task-claim" onclick="claimHidden(${t.r})">挑战</div></div>
+  </div>`;
+  notify('🔮 隐藏任务解锁！','epic');
+}
+
+function claimHidden(r){
+  addSP(r,'隐藏任务');addExp(r/5);
+  const c=document.getElementById('hidden-tasks');
+  if(c)c.innerHTML='<div class="empty-state"><div class="ei">🎯</div><div class="em">任务完成！</div></div>';
+  notify(`👑 隐藏任务完成！+${r} 魂力！`,'legend');saveState();
+}
+
+// ══════════════════════════════════════════════════
+//  BAG
+// ══════════════════════════════════════════════════
+function filterBag(f,el){
+  curBagFilter=f;
+  document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');renderBag();
+}
+
+function renderBag(){
+  const c=document.getElementById('bag-grid');if(!c)return;
+  let items=G.bag;
+  if(curBagFilter!=='all')items=items.filter(i=>i.type===curBagFilter);
+  if(!items.length){c.innerHTML='<div style="grid-column:span 4;" class="empty-state"><div class="ei">🎒</div><div class="em">此分类为空</div></div>';return;}
+  c.innerHTML=items.map(item=>{
+    let ico,name,col='var(--dim)',extra='';
+    if(item.type==='ring'){ico='⭕';name=item.data.n;col=item.data.c;}
+    else if(item.type==='bone'){ico='🦴';name=item.data.n;col='#fbbf24';}
+    else if(item.type==='artifact'){ico=item.data.i;name=item.data.n;col='var(--legend)';}
+    else if(item.type==='herb'){ico=item.data.i;name=item.data.n;col=item.data.c;extra=' herb';}
+    else if(item.type==='title'){ico='👑';name=item.data.n||item.data;col=item.data.c||'var(--divine)';}
+    return`<div class="bag-item${extra}" onclick="openBagItem('${item.id||item.data?.id}','${item.type}')">
+      <div class="bi-ico">${ico}</div>
+      <div class="bi-name" style="color:${col}">${name}</div>
+      ${item.count>1?`<div class="bi-cnt">${item.count}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openBagItem(id,type){
+  const item=G.bag.find(i=>(i.id==id)||(i.data?.id==id));
+  if(!item)return;
+  let html='';
+  if(type==='ring'){
+    html=`<div class="m-title" style="color:${item.data.c}">⭕ ${item.data.n}</div>
+      <div class="m-sub">魂环 · 数量: ${item.count}</div>
+      <div class="m-sec"><div class="m-sec-title">属性</div>
+        <div class="m-attr-grid">
+          <div class="m-attr"><div class="m-attr-n">年份</div><div class="m-attr-v">${item.data.n}</div></div>
+          <div class="m-attr"><div class="m-attr-n">魂技</div><div class="m-attr-v" style="font-size:12px">${item.data.skill}</div></div>
+        </div>
+      </div>
+      <div class="m-actions">
+        <div class="m-btn ok" onclick="openAssignRing();closeModal(event)">装配武魂</div>
+        <div class="m-btn grn" onclick="openFusionWithRing('${item.data.id||id}');closeModal(event)">融合魂环</div>
+        <div class="m-btn bad" onclick="dropItem('${item.id||id}');closeModal(event)">丢弃</div>
+      </div>`;
+  } else if(type==='bone'){
+    html=`<div class="m-title">🦴 ${item.data.n}</div>
+      <div class="m-sub">魂骨 · ${item.data.ringYear}</div>
+      <div class="m-attr-grid" style="margin:10px 0">
+        <div class="m-attr"><div class="m-attr-n">战力加成</div><div class="m-attr-v">+${item.data.yearPow}</div></div>
+        <div class="m-attr"><div class="m-attr-n">部位</div><div class="m-attr-v" style="font-size:12px">${item.data.s}</div></div>
+      </div>
+      <div class="m-actions">
+        <div class="m-btn ok" onclick="equipBone('${item.id||id}');closeModal(event)">装备</div>
+        <div class="m-btn bad" onclick="dropItem('${item.id||id}');closeModal(event)">丢弃</div>
+      </div>`;
+  } else if(type==='herb'){
+    html=`<div class="m-title" style="color:${item.data.c}">${item.data.i} ${item.data.n}</div>
+      <div class="m-sub">药草 · 数量: ${item.count}</div>
+      <div style="font-size:12px;color:var(--dim);text-align:center;margin:10px 0;line-height:1.7">${item.data.desc}</div>
+      <div class="m-attr-grid" style="margin-bottom:12px">
+        <div class="m-attr"><div class="m-attr-n">融合成功率加成</div><div class="m-attr-v">+${item.data.fusionBonus.successRate}%</div></div>
+        <div class="m-attr"><div class="m-attr-n">质变概率加成</div><div class="m-attr-v">+${item.data.fusionBonus.mutateRate}%</div></div>
+      </div>
+      <div class="m-actions">
+        ${item.data.effect!=='fusion'?`<div class="m-btn ok" onclick="useHerb('${item.data.id||item.id}');closeModal(event)">使用</div>`:''}
+        <div class="m-btn grn" onclick="openFusionFromHerb('${item.data.id||item.id}');closeModal(event)">用于融合</div>
+        <div class="m-btn bad" onclick="dropItem('${item.id||id}');closeModal(event)">丢弃</div>
+      </div>`;
+  } else if(type==='artifact'){
+    html=`<div class="m-title">${item.data.i} ${item.data.n}</div>
+      <div class="m-sub" style="color:var(--legend)">神器</div>
+      <div style="font-size:12px;color:var(--dim);text-align:center;margin:10px 0">${item.data.d}</div>
+      <div class="m-attr" style="text-align:center;margin-bottom:12px"><div class="m-attr-n">战力</div><div class="m-attr-v">+${item.data.power}</div></div>
+      <div class="m-actions">
+        <div class="m-btn ok" onclick="equipArt('${item.data.id}');closeModal(event)">穿戴</div>
+        <div class="m-btn bad" onclick="dropItem('${item.id||id}');closeModal(event)">丢弃</div>
+      </div>`;
+  } else if(type==='title'){
+    const t=item.data;
+    html=`<div class="m-title" style="color:${t.c||'var(--gold-l)'}">👑 ${t.n}</div>
+      <div class="m-sub">称号</div>
+      <div style="font-size:13px;color:var(--dim);text-align:center;margin:14px 0">${t.d||''}</div>`;
+  }
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('modal').classList.add('show');
+}
+
+function useHerb(id){
+  const item=G.bag.find(i=>(i.data?.id==id)||(i.id==id));
+  if(!item||item.type!=='herb')return;
+  const h=item.data;
+  if(h.effect==='魂力'){addSP(h.value,`使用${h.n}`);notify(`🌿 ${h.n}：+${h.value} 魂力`,'epic');}
+  else if(h.effect==='exp'){addExp(h.value);notify(`🌿 ${h.n}：+${h.value} 经验`,'epic');}
+  else if(h.effect==='luck'){G.luckBonus=(G.luckBonus||0)+h.value;notify(`🌿 ${h.n}：幸运值+${h.value}，下次抽奖概率提升！`,'epic');}
+  item.count--;
+  if(item.count<=0)G.bag=G.bag.filter(i=>(i.data?.id!=id)&&(i.id!=id));
+  saveState();renderBag();
+}
+
+function equipBone(id){
+  const item=G.bag.find(i=>(i.id==id)||(i.data?.id==id));
+  if(!item)return;
+  G.bones.push(item.data);
+  G.bag=G.bag.filter(i=>(i.id!=id)&&(i.data?.id!=id));
+  addExp(100);notify(`🦴 ${item.data.n} 已装备！战力+${item.data.yearPow}`,'epic');
+  saveState();renderBag();renderSoulPage();
+}
+
+function dropItem(id){
+  G.bag=G.bag.filter(i=>(i.id!=id)&&(i.data?.id!=id));
+  notify('物品已丢弃','normal');saveState();renderBag();
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════════
+//  RING FUSION
+// ══════════════════════════════════════════════════
+function openFusionWithRing(ringId){
+  fusionState={a:null,b:null,herbs:[]};
+  navTo('bag',null);
+  setTimeout(()=>openFusionPage(ringId),100);
+}
+function openFusionFromHerb(herbId){
+  fusionState={a:null,b:null,herbs:[]};
+  navTo('bag',null);
+  setTimeout(()=>openFusionPage(null,herbId),100);
+}
+
+function openFusionPage(preRingId,preHerbId){
+  // Hide bag, show fusion sub-page
+  document.getElementById('page-bag').classList.remove('active');
+  const fp=document.getElementById('page-fusion');
+  fp.style.display='block';
+  fp.classList.add('active');
+
+  if(preRingId){
+    const item=G.bag.find(i=>(i.data?.id==preRingId)||(i.id==preRingId));
+    if(item){fusionState.a=item;updateFusionCircle('a',item);}
+  }
+  if(preHerbId){
+    const item=G.bag.find(i=>(i.data?.id==preHerbId)||(i.id==preHerbId));
+    if(item){fusionState.herbs=[item];updateFusionHerbSlot(0,item);}
+  }
+  updateFusionRates();
+}
+
+function closeFusion(){
+  document.getElementById('page-fusion').style.display='none';
+  document.getElementById('page-fusion').classList.remove('active');
+  document.getElementById('page-bag').classList.add('active');
+  fusionState={a:null,b:null,herbs:[]};
+  // Reset UI
+  ['a','b'].forEach(s=>{
+    document.getElementById(`fc-${s}-ico`).textContent='⭕';
+    document.getElementById(`fc-${s}-name`).textContent=`选择魂环${s.toUpperCase()}`;
+    document.getElementById(`fc-${s}`).classList.remove('filled');
+  });
+  [0,1,2].forEach(i=>{
+    const sl=document.getElementById(`fhs-${i}`);
+    if(sl){sl.innerHTML='<span style="font-size:20px">+</span>';sl.classList.remove('filled');}
+  });
+  document.getElementById('fc-result').innerHTML='<div style="font-size:24px">✨</div><div style="font-size:9px;margin-top:2px;text-align:center;color:var(--dim)">融合结果</div>';
+  renderBag();
+}
+
+function selectFusionRing(slot){
+  fusionSelTarget=slot;
+  const rings=G.bag.filter(i=>i.type==='ring');
+  if(!rings.length){notify('背包中无可用魂环','normal');return;}
+  document.getElementById('ring-sel-list').innerHTML=rings.map(r=>`
+    <div class="ring-item" onclick="pickFusionRing('${r.data?.id||r.id}')">
+      <div class="ring-orb" style="background:${r.data.c}">${r.data.n[0]}</div>
+      <div class="ring-info">
+        <div class="ring-yr" style="color:${r.data.c}">${r.data.n}</div>
+        <div class="ring-sk">${r.data.skill}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('ring-sel-modal').style.display='flex';
+}
+
+function pickFusionRing(id){
+  const item=G.bag.find(i=>(i.data?.id==id)||(i.id==id));
+  if(!item)return;
+  if(fusionSelTarget==='a')fusionState.a=item;
+  else fusionState.b=item;
+  updateFusionCircle(fusionSelTarget,item);
+  closeRingSel();
+  updateFusionRates();
+  previewFusionResult();
+}
+
+function updateFusionCircle(slot,item){
+  const ico=document.getElementById(`fc-${slot}-ico`);
+  const nm=document.getElementById(`fc-${slot}-name`);
+  const el=document.getElementById(`fc-${slot}`);
+  ico.style.color=item.data.c;ico.style.fontSize='22px';ico.textContent='⭕';
+  nm.textContent=item.data.n;nm.style.color=item.data.c;
+  el.classList.add('filled');
+}
+
+function addFusionHerb(slot){
+  const herbs=G.bag.filter(i=>i.type==='herb');
+  if(!herbs.length){notify('背包中无药草','normal');return;}
+  fusionHerbTarget=slot;
+  document.getElementById('ring-sel-list').innerHTML=herbs.map(h=>`
+    <div class="herb-item" style="cursor:pointer" onclick="pickFusionHerb('${h.data?.id||h.id}')">
+      <div class="herb-icon">${h.data.i}</div>
+      <div class="herb-info">
+        <div class="herb-name">${h.data.n}</div>
+        <div class="herb-effect">融合+${h.data.fusionBonus.successRate}% · 质变+${h.data.fusionBonus.mutateRate}%</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('ring-sel-modal').style.display='flex';
+}
+
+function pickFusionHerb(id){
+  const item=G.bag.find(i=>(i.data?.id==id)||(i.id==id));
+  if(!item)return;
+  if(fusionState.herbs.length<=fusionHerbTarget)fusionState.herbs.push(item);
+  else fusionState.herbs[fusionHerbTarget]=item;
+  updateFusionHerbSlot(fusionHerbTarget,item);
+  closeRingSel();
+  updateFusionRates();
+}
+
+function updateFusionHerbSlot(slot,item){
+  const el=document.getElementById(`fhs-${slot}`);
+  if(!el)return;
+  el.innerHTML=`<span style="font-size:20px">${item.data.i}</span><span style="font-size:8px;color:${item.data.c}">${item.data.n.slice(0,4)}</span>
+    <div class="fh-remove" onclick="removeFusionHerb(${slot})">×</div>`;
+  el.classList.add('filled');
+}
+
+function removeFusionHerb(slot){
+  fusionState.herbs.splice(slot,1);
+  const el=document.getElementById(`fhs-${slot}`);
+  if(el){el.innerHTML='<span style="font-size:20px">+</span>';el.classList.remove('filled');}
+  updateFusionRates();
+}
+
+function updateFusionRates(){
+  let baseRate=50,herbSucc=0,baseMutate=1,herbMutate=0;
+  fusionState.herbs.forEach(h=>{
+    if(h?.data?.fusionBonus){herbSucc+=h.data.fusionBonus.successRate;herbMutate+=h.data.fusionBonus.mutateRate;}
+  });
+  const finalRate=Math.min(95,baseRate+herbSucc);
+  const finalMutate=Math.min(50,baseMutate+herbMutate);
+  document.getElementById('fr-base').textContent=`${baseRate}%`;
+  document.getElementById('fr-herb-bonus').textContent=`+${herbSucc}%`;
+  document.getElementById('fr-final').textContent=`${finalRate}%`;
+  document.getElementById('fr-mutate').textContent=`${baseMutate}%`;
+  document.getElementById('fr-herb-mutate').textContent=`+${herbMutate}%`;
+}
+
+function previewFusionResult(){
+  if(!fusionState.a||!fusionState.b)return;
+  const tiers=RING_TIERS;
+  const ai=tiers.findIndex(t=>t.n===fusionState.a.data.n);
+  const bi=tiers.findIndex(t=>t.n===fusionState.b.data.n);
+  const maxTi=Math.max(ai>=0?ai:0,bi>=0?bi:0);
+  const resultTier=tiers[Math.min(maxTi,tiers.length-2)];
+  const rc=document.getElementById('fc-result');
+  rc.innerHTML=`<div style="font-size:18px;color:${resultTier.c}">⭕</div><div style="font-size:9px;margin-top:2px;text-align:center;color:${resultTier.c}">${resultTier.n}</div>`;
+}
+
+function executeFusion(){
+  if(!fusionState.a||!fusionState.b){notify('请选择两个魂环','normal');return;}
+  let herbSucc=0,herbMutate=0;
+  fusionState.herbs.forEach(h=>{if(h?.data?.fusionBonus){herbSucc+=h.data.fusionBonus.successRate;herbMutate+=h.data.fusionBonus.mutateRate;}});
+  const finalRate=Math.min(95,50+herbSucc);
+  const finalMutate=Math.min(50,1+herbMutate);
+
+  if(Math.random()*100>finalRate){
+    notify('💔 融合失败！两个魂环消耗。','normal');
+  } else {
+    const tiers=RING_TIERS;
+    const ai=tiers.findIndex(t=>t.n===fusionState.a.data.n);
+    const bi=tiers.findIndex(t=>t.n===fusionState.b.data.n);
+    let maxTi=Math.max(ai>=0?ai:0,bi>=0?bi:0);
+    // Mutate: upgrade by 1
+    const mutated=Math.random()*100<finalMutate;
+    if(mutated){maxTi=Math.min(maxTi+1,tiers.length-2);notify('✨ 融合质变！品质提升！','legend');spawnBurst('#f0d060',80);}
+    const resultTier=tiers[maxTi];
+    const skill=pick(resultTier.skills);
+    const ro={id:Date.now(),n:resultTier.n,y:resultTier.y,c:resultTier.c,skill,tier:resultTier.n};
+    G.bag.push({type:'ring',data:ro,count:1,id:Date.now()});
+    notify(`⚗ 融合成功！获得 ${resultTier.n} 魂环·${skill}${mutated?' (质变)':''}`,resultTier.y>=999999999?'legend':'epic');
+  }
+
+  // Remove rings and herbs from bag
+  [fusionState.a,fusionState.b].forEach(item=>{
+    if(!item)return;
+    const bagItem=G.bag.find(i=>(i.id===item.id)||(i.data?.id===item.data?.id));
+    if(bagItem){bagItem.count--;if(bagItem.count<=0)G.bag=G.bag.filter(i=>i!==bagItem);}
+  });
+  fusionState.herbs.forEach(item=>{
+    if(!item)return;
+    const bagItem=G.bag.find(i=>(i.id===item.id)||(i.data?.id===item.data?.id));
+    if(bagItem){bagItem.count--;if(bagItem.count<=0)G.bag=G.bag.filter(i=>i!==bagItem);}
+  });
+
+  saveState();closeFusion();
+}
+
+// ══════════════════════════════════════════════════
+//  IDLE ENGINE
+// ══════════════════════════════════════════════════
+setInterval(()=>{
+  if(G.idleEarned<1000){
+    G.sp++;G.idleEarned++;G.dailyEarned++;updateHUD();
+    updateTaskCounters();
+    if(Math.random()<0.0005)saveState();
+  }
+},1000);
+
+// Online reward
+setInterval(()=>{
+  addSP(100,'在线奖励');
+  progressTask('earn',100);
+},60000);
+
+// Auto-save
+setInterval(()=>saveState(),8000);
+
+// ══════════════════════════════════════════════════
+//  PARTICLES
+// ══════════════════════════════════════════════════
+const cvs=document.getElementById('ptc'),ctx2=cvs.getContext('2d');
+let pts=[];
+function resizePtc(){cvs.width=window.innerWidth;cvs.height=window.innerHeight;}
+resizePtc();window.addEventListener('resize',resizePtc);
+
+function spawnBurst(color,n){
+  const cx=cvs.width/2,cy=cvs.height*.45;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,s=rand(5)+1;
+    pts.push({x:cx,y:cy,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,decay:.018+rand(.025),sz:rand(4)+1,col:color||`hsl(${rand(360)},100%,70%)`});
+  }
+}
+
+function animPtc(){
+  ctx2.clearRect(0,0,cvs.width,cvs.height);
+  pts=pts.filter(p=>p.life>0);
+  pts.forEach(p=>{
+    ctx2.globalAlpha=p.life;ctx2.fillStyle=p.col;
+    ctx2.beginPath();ctx2.arc(p.x,p.y,p.sz,0,Math.PI*2);ctx2.fill();
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.life-=p.decay;
+  });
+  ctx2.globalAlpha=1;requestAnimationFrame(animPtc);
+}
+animPtc();
+
+// Stars
+(function(){
+  const sb=document.getElementById('star-bg');
+  for(let i=0;i<55;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=rand(2)+.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${rand(100)}%;top:${rand(100)}%;--d:${(rand(3)+2).toFixed(1)}s;--dl:${(-rand(5)).toFixed(1)}s;--mn:${(rand(.3)+.1).toFixed(2)};--mx:${(rand(.4)+.5).toFixed(2)}`;
+    sb.appendChild(s);
+  }
+})();
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+if(G.awakenDone){
+  document.getElementById('screen-awaken').style.display='none';
+}
+updateHUD();updateExpBar();
+if(!G.tasks.length)generateTasks();
+renderSoulPage();
+renderLotPage();
+setTimeout(updateTaskCounters,200);
+
+console.log('%c✦ 斗罗觉醒 v2 ✦','color:#c9a227;font-size:18px;font-weight:bold;');
+</script>
+
+</body>
+</html>
